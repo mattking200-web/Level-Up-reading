@@ -42,7 +42,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <label><b>Select Your Level:</b></label>
+            <label><b>Select Level:</b></label>
             <select id="lvl-select" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; font-size:1rem;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
@@ -80,6 +80,13 @@ const STORIES = {
     { title:"Fishing", text:"We go to the lake to fish. My dad has a big boat. We catch a little fish.", q:[{q:"Where do they go?",opts:["The ocean","The park","The lake"],a:2},{q:"What size is the boat?",opts:["Small","Big","Red"],a:1},{q:"What do they catch?",opts:["A big fish","A frog","A little fish"],a:2}] },
     { title:"The Blue Bike", text:"I have a new blue bike. I wear my helmet to be safe. I can ride fast.", q:[{q:"What color is the bike?",opts:["Red","Blue","Green"],a:1},{q:"Why do they wear a helmet?",opts:["To look cool","To be safe","To keep warm"],a:1},{q:"How can they ride?",opts:["Slow","Fast","Side ways"],a:1}] },
     { title:"My School", text:"I go to school every day. My teacher is very nice. I like to read books.", q:[{q:"How often do they go to school?",opts:["Every day","Sometimes","On Mondays"],a:0},{q:"How is the teacher?",opts:["Mean","Nice","Tall"],a:1},{q:"What do they like to do?",opts:["Play tag","Read books","Paint"],a:1}] }
+  ],
+  C: [
+    { title:"The Tall Giraffe", text:"The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q:[{q:"What is the giraffe like?",opts:["Short","Tall","Fat"],a:1},{q:"Why is its neck long?",opts:["To see far","To eat leaves","To drink water"],a:1},{q:"Where does it live?",opts:["In a house","In the zoo","On a farm"],a:1}] },
+    { title:"My Garden", text:"I planted seeds in the dirt. I give them water every day. Soon I will see green plants.", q:[{q:"What was planted?",opts:["Flowers","Trees","Seeds"],a:2},{q:"What do the seeds need every day?",opts:["Food","Water","Toys"],a:1},{q:"What color will the plants be?",opts:["Red","Blue","Green"],a:2}] },
+    { title:"A Rainy Day", text:"The rain is falling down fast. I wear my yellow coat and boots. I like to jump in the water.", q:[{q:"What is the weather like?",opts:["Sunny","Snowy","Rainy"],a:2},{q:"What color is the coat?",opts:["Blue","Yellow","Green"],a:1},{q:"What does the child like to do?",opts:["Jump in water","Run fast","Sleep"],a:0}] },
+    { title:"Helping Dad", text:"My dad is making a big cake. I help him stir the eggs. It smells very good in the kitchen.", q:[{q:"What is Dad making?",opts:["Bread","Cookies","A cake"],a:2},{q:"How does the child help?",opts:["Eating","Stirring eggs","Cleaning"],a:1},{q:"Where are they?",opts:["In the garden","In the kitchen","In the car"],a:1}] },
+    { title:"The Night Sky", text:"The moon is bright in the sky. I can see many stars tonight. I go to bed and dream.", q:[{q:"What is bright in the sky?",opts:["The sun","The moon","A plane"],a:1},{q:"What else can they see?",opts:["Stars","Clouds","Birds"],a:0},{q:"What do they do at the end?",opts:["Play","Eat","Go to bed"],a:2}] }
   ]
 };
 
@@ -215,7 +222,7 @@ function levelUp() {
     let idx = lvls.indexOf(currentLevel);
     if (idx < lvls.length - 1) {
         currentLevel = lvls[idx + 1]; streak = 0; storyIdx = 0;
-        setTimeout(() => alert("🎉 AMAZING! You unlocked Level " + currentLevel), 500);
+        setTimeout(() => alert("🎉 AMAZING! You reached Level " + currentLevel), 500);
     }
 }
 </script>
