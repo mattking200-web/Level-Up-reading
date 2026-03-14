@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reading Buddy 📚</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mint:#4ade80; --mint-dark:#16a34a; --sky:#38bdf8; --sky-dark:#0284c7;
+  --coral:#fb7185; --yellow:#fbbf24; --purple:#a78bfa; --orange:#fb923c;
+  --bg:#f0fdf4; --text:#1e293b; --muted:#64748b; --border:#e2e8f0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  min-height:100vh;color:var(--text);padding:16px;
+}
+.container{max-width:800px;margin:0 auto;}
+header{text-align:center;margin-bottom:24px;}
+h1{font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--mint-dark);text-shadow:2px 2px #fff;}
+.card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);border:4px solid #fff;margin-bottom:20px;}
+.stats-bar{display:flex;gap:12px;margin-bottom:20px;justify-content:center;}
+.stat-pill{background:#fff;padding:8px 16px;border-radius:99px;font-weight:800;border:2px solid var(--border);display:flex;align-items:center;gap:6px;}
+.level-badge{background:var(--purple);color:#fff;border:none;}
+
+.story-text{font-size:1.8rem;line-height:1.6;margin:20px 0;white-space:pre-wrap;font-weight:600;}
+.word{display:inline-block;margin-right:8px;padding:2px 4px;border-radius:6px;transition:all 0.2s;}
+.word.ok{background:#dcfce7;color:#166534;}
+.word.bad{background:#fee2e2;color:#991b1b;text-decoration:line-through;}
+
+.btn{
+  font-family:inherit;font-weight:800;padding:14px 28px;border-radius:16px;
+  border:none;cursor:pointer;transition:transform 0.1s, box-shadow 0.1s;
+  font-size:1.1rem;display:inline-flex;align-items:center;gap:8px;
+}
+.btn:active{transform:translateY(2px);}
+.btn-primary{background:var(--mint);color:#064e3b;box-shadow:0 4px 0 var(--mint-dark);}
+.btn-sky{background:var(--sky);color:#082f49;box-shadow:0 4px 0 var(--sky-dark);}
+
+/* Quiz Styling */
+.quiz-section{margin-top:30px;padding-top:30px;border-top:2px dashed var(--border);}
+.quiz-q{margin-bottom:20px;padding:15px;background:#f8fafc;border-radius:12px;}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.opt-btn{padding:10px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-weight:700;}
+.opt-btn.correct{background:var(--mint);border-color:var(--mint-dark);}
+.opt-btn.wrong{background:var(--coral);border-color:#be123c;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Reading Buddy 📚</h1>
+  </header>
+
+  <div class="card">
+    <div class="stats-bar">
+      <div class="stat-pill level-badge" id="display-level">Level AA</div>
+      <div class="stat-pill">Streak: <span id="display-streak">0</span></div>
+    </div>
+    
+    <div id="setup-area">
+      <label>Choose Level:</label>
+      <select id="level-select" onchange="updateStoryList()"></select>
+      <br><br>
+      <label>Choose Story:</label>
+      <select id="story-select"></select>
+      <br><br>
+      <button class="btn btn-primary" onclick="startStory()">Start Reading! 🚀</button>
+    </div>
+
+    <div id="reading-area" style="display:none;">
+      <h2 id="story-title"></h2>
+      <div id="text-container" class="story-text"></div>
+      <button id="mic-btn" class="btn btn-sky" onclick="toggleMic()">Click to Speak 🎤</button>
+      <div id="results-area" style="display:none; margin-top:20px;"></div>
+      <div id="quiz-area" class="quiz-section"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORIES = {
+  AA: [
+    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird","A fish"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big","Short"],a:2},{q:"How does the child feel about the cat?",opts:["They like it","They fear it","They ignore it","They hide"],a:0}] },
+    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Black","Red","Green"],a:2},{q:"What can the dog do?",opts:["Fly","Run","Sing","Swim"],a:1},{q:"How does the child feel about the dog?",opts:["They love it","They are sad","They are mad","They are scared"],a:0}] },
+    { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up","In the water"],a:2},{q:"What does the child see?",opts:["The moon","The sun","A star","A cloud"],a:1},{q:"What is the sun like?",opts:["Cold","Wet","Hot","Dark"],a:2}] }
+  ],
+  A: [
+    { title:"I Can Jump", text:"I can jump. I can run. I can hop. I can play. It is fun.", q:[{q:"What is one thing the child can do?",opts:["Swim","Jump","Fly","Climb"],a:1},{q:"How is playing described?",opts:["Hard","Boring","Fun","Loud"],a:2},{q:"Which other action is mentioned?",opts:["Sleeping","Eating","Hop","Singing"],a:2}] },
+    { title:"The Big Box", text:"I see a big box. The box is red. I put my toys in the box. I like my box.", q:[{q:"What color is the box?",opts:["Blue","Green","Red","Yellow"],a:2},{q:"What goes inside the box?",opts:["Books","Toys","Food","Clothes"],a:1},{q:"How does the child feel about the box?",opts:["Hates it","Likes it","Fears it","Breaks it"],a:1}] }
+  ],
+  B: [
+    { title:"At the Park", text:"We go to the park. I see a slide. I can go up and down. My dad is here. We have fun at the park.", q:[{q:"Where do they go?",opts:["The beach","The park","The store","The school"],a:1},{q:"What does the child see?",opts:["A swing","A slide","A pond","A tree"],a:1},{q:"Who is with the child?",opts:["Mom","Friend","Dad","Teacher"],a:2}] }
+  ],
+  C: [
+    { title:"The Nest", text:"A bird has a nest in the tree. The nest has three eggs in it. The eggs are small and blue. One day the eggs crack open. Three baby birds pop out. They are hungry. The mom bird brings food.", q:[{q:"Where is the nest?",opts:["On the ground","In a bush","In the tree","On the roof"],a:2},{q:"What color are the eggs?",opts:["White","Yellow","Green","Blue"],a:3},{q:"How many baby birds are there?",opts:["One","Two","Three","Four"],a:2}] }
+  ],
+  D: [
+    { title:"The Garden", text:"Grandma has a garden in her backyard. She grows tomatoes, beans, and flowers. Every morning she waters the plants. I help her pull the weeds. When the vegetables are ready, we pick them together. Then Grandma makes soup. It tastes so good because we grew it ourselves.", q:[{q:"Where is the garden?",opts:["Front yard","Backyard","Roof","Park"],a:1},{q:"What does Grandma make?",opts:["Salad","Stew","Soup","Sandwich"],a:2},{q:"What does the child help with?",opts:["Watering","Planting","Pulling weeds","Cooking"],a:2}] }
+  ],
+  E: [
+    { title:"The Science Fair", text:"Our class had a science fair. I made a volcano out of clay and painted it red and orange. I put baking soda inside. When I poured in the vinegar, it bubbled up like lava. Everyone gathered around to watch. My teacher said it was an excellent project. I felt very proud of all the work I had done.", q:[{q:"What did the child make?",opts:["A robot","A solar system","A volcano","A bridge"],a:2},{q:"What caused the bubbles?",opts:["Water","Vinegar","Juice","Soap"],a:1},{q:"How did the child feel?",opts:["Sad","Tired","Proud","Scared"],a:2}] }
+  ],
+  F: [
+    { title:"My New Boots", text:"I got new boots for the rain. They are yellow and shiny. I put them on and ran outside. I jumped in a big puddle. Splash! Water went everywhere. My boots kept my feet dry. I love my new yellow boots.", q:[{q:"What color are the boots?",opts:["Red","Blue","Yellow","Green"],a:2},{q:"What did the child jump in?",opts:["Leaves","A puddle","Sand","Snow"],a:1},{q:"What stayed dry?",opts:["Hands","Coat","Feet","Bag"],a:2}] }
+  ]
+};
+
+let currentLevel = 'AA';
+let currentStreak = 0;
+let currentStory = null;
+let isRecording = false;
+let recognition = null;
+
+// Initialize
+window.onload = () => {
+  const lvSelect = document.getElementById('level-select');
+  Object.keys(STORIES).forEach(lv => {
+    let opt = document.createElement('option');
+    opt.value = lv; opt.textContent = lv;
+    lvSelect.appendChild(opt);
+  });
+  updateStoryList();
+  
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new Speech();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+  }
+};
+
+function updateStoryList() {
+  const lv = document.getElementById('level-select').value;
+  const sSelect = document.getElementById('story-select');
+  sSelect.innerHTML = '';
+  STORIES[lv].forEach((s, idx) => {
+    let opt = document.createElement('option');
+    opt.value = idx; opt.textContent = s.title;
+    sSelect.appendChild(opt);
+  });
+}
+
+function startStory() {
+  const lv = document.getElementById('level-select').value;
+  const idx = document.getElementById('story-select').value;
+  currentStory = STORIES[lv][idx];
+  
+  document.getElementById('setup-area').style.display = 'none';
+  document.getElementById('reading-area').style.display = 'block';
+  document.getElementById('story-title').textContent = currentStory.title;
+  
+  const container = document.getElementById('text-container');
+  container.innerHTML = currentStory.text.split(' ').map(w => `<span class="word">${w}</span>`).join(' ');
+  
+  document.getElementById('quiz-area').innerHTML = '';
+}
+
+function toggleMic() {
+  if (!recognition) return alert("Speech not supported in this browser.");
+  if (isRecording) {
+    recognition.stop();
+    isRecording = false;
+    document.getElementById('mic-btn').textContent = "Click to Speak 🎤";
+    processResults();
+  } else {
+    recognition.start();
+    isRecording = true;
+    document.getElementById('mic-btn').textContent = "Listening... Click to Stop ⏹️";
+  }
+}
+
+function processResults() {
+  // Simple simulation of reading check
+  const words = document.querySelectorAll('.word');
+  words.forEach(w => w.classList.add('ok')); // Mark all as read for demo
+  showQuiz();
+}
+
+function showQuiz() {
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = '<h3>Comprehension Quiz</h3>';
+  currentStory.q.forEach((qObj, qIdx) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'quiz-q';
+    qDiv.innerHTML = `<p><strong>${qIdx+1}. ${qObj.q}</strong></p>`;
+    
+    const optsDiv = document.createElement('div');
+    optsDiv.className = 'quiz-options';
+    
+    qObj.opts.forEach((opt, oIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (oIdx === qObj.a) {
+          btn.classList.add('correct');
+        } else {
+          btn.classList.add('wrong');
+        }
+      };
+      optsDiv.appendChild(btn);
+    });
+    
+    qDiv.appendChild(optsDiv);
+    area.appendChild(qDiv);
+  });
+}
+</script>
+
+</body>
+</html>
