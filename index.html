@@ -1,128 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Reading Buddy 📚</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
-<style>
-:root {
-  --mint:#4ade80; --mint-dark:#16a34a; --sky:#38bdf8; --sky-dark:#0284c7;
-  --bg:#f0fdf4; --text:#1e293b; --border:#e2e8f0; --error: #ef4444;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); padding:16px;}
-.container{max-width:700px; margin:0 auto;}
-.card{background:#fff; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.1); border:2px solid var(--border); margin-bottom:20px;}
-h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center; margin-bottom:20px;}
-
-/* Stats and Story Layout */
-.stats{display:flex; justify-content:space-between; margin-bottom:20px; font-weight:800; background:#f8fafc; padding:10px; border-radius:12px;}
-.story-text{font-size:1.8rem; line-height:1.8; font-weight:700; margin-bottom:20px; text-align:center;}
-.word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: 0.2s; border-bottom: 3px solid transparent;}
-.word.correct{color: var(--mint-dark); border-bottom-color: var(--mint);}
-.word.wrong{color: var(--error); text-decoration: underline wavy var(--error);}
-
-/* Mic Button & Pulse */
-.mic-pulse-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 10px; }
-.pulse-dot {
-  width: 14px; height: 14px; background-color: var(--error); border-radius: 50%;
-  display: none;
-}
-.listening .pulse-dot {
-  display: block;
-  animation: glowing-pulse 1.5s infinite;
-}
-@keyframes glowing-pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-
-.btn{font-family:'Fredoka One',cursive; padding:18px 25px; border-radius:18px; border:none; cursor:pointer; font-size:1.2rem; width:100%; transition: 0.2s;}
-.btn-mic{background:var(--sky); color:#fff; box-shadow: 0 4px 0 #0284c7;}
-.btn-mic:active{transform: translateY(2px); box-shadow: 0 2px 0 #0284c7;}
-.btn-mic.listening { background: #64748b; box-shadow: 0 4px 0 #334155; }
-
-.transcript-box {margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 1rem; color: #475569; min-height: 50px;}
-.btn-next{background:var(--mint); color:#fff; display:none; margin-top: 10px;}
-</style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Reading Buddy 📚</h1>
-    <div class="card">
-        <div class="stats">
-            <div>Level: <span id="lvl-display">AA</span></div>
-            <div>Streak: <span id="streak-display">0</span></div>
-        </div>
-
-        <div id="setup-view">
-            <select id="lvl-select" style="width:100%; padding:15px; margin-bottom:15px; border-radius:12px; font-size: 1.1rem; border: 2px solid var(--border);"></select>
-            <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
-        </div>
-
-        <div id="reading-view" style="display:none;">
-            <h2 id="story-title" style="text-align:center; color:var(--sky-dark); margin-bottom:15px;"></h2>
-            <div id="story-display" class="story-text"></div>
-            
-            <div id="mic-area" class="mic-pulse-container">
-                <div class="pulse-dot"></div>
-                <button id="mic-btn" class="btn btn-mic" onclick="toggleMic()">Click to Speak 🎤</button>
-            </div>
-
-            <div class="transcript-box"><b>I hear:</b> <span id="live-transcript">...</span></div>
-            <div id="accuracy-display" style="text-align:center; font-weight:900; margin:15px; font-size: 1.2rem;"></div>
-            <button id="next-btn" class="btn btn-next" onclick="nextStory()">Next Story ➡️</button>
-        </div>
-    </div>
-</div>
-
-<script>
-const STORIES = {
-  C: [{ title:"The Tall Giraffe", text:"The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q:[] }],
-  D: [{ title:"The Busy Bees", text:"The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q:[] }]
-};
-
-let currentLevel = "C", storyIdx = 0, streak = 0;
 let recognition;
-let isActuallyReading = false;
-let wordPointer = 0;
-let storyWordsClean = [];
-
-// Init Level Select
-const select = document.getElementById('lvl-select');
-Object.keys(STORIES).forEach(lvl => {
-    let opt = document.createElement('option'); opt.value = lvl; opt.textContent = "Level " + lvl; select.appendChild(opt);
-});
-
-function startApp() {
-    currentLevel = select.value;
-    document.getElementById('setup-view').style.display = 'none';
-    document.getElementById('reading-view').style.display = 'block';
-    loadStory();
-}
-
-function loadStory() {
-    const story = STORIES[currentLevel][storyIdx];
-    document.getElementById('story-title').textContent = story.title;
-    document.getElementById('lvl-display').textContent = currentLevel;
-    document.getElementById('accuracy-display').textContent = "";
-    document.getElementById('live-transcript').textContent = "...";
-    document.getElementById('next-btn').style.display = 'none';
-    document.getElementById('mic-btn').style.display = 'block';
-    
-    wordPointer = 0;
-    const words = story.text.trim().split(/\s+/);
-    storyWordsClean = words.map(w => w.replace(/[^\w\s]|_/g, "").toLowerCase());
-    
-    document.getElementById('story-display').innerHTML = words.map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
-}
+let isActuallyReading = false; // Tracks if we WANT the mic on
 
 function initSpeech() {
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Speech) { alert("Mic not supported on this browser."); return; }
+    if (!Speech) {
+        alert("Speech recognition is not supported in this browser. Please use Chrome or Safari.");
+        return;
+    }
 
     recognition = new Speech();
     recognition.continuous = true;
@@ -130,91 +14,58 @@ function initSpeech() {
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
-        document.getElementById('mic-area').classList.add('listening');
-        document.getElementById('mic-btn').textContent = "I'm Listening... Click to Stop";
+        console.log("Mic is now live.");
+        document.getElementById('mic-btn').classList.add('listening');
     };
 
     recognition.onresult = (event) => {
-        let interimTranscript = "";
+        let currentTranscript = "";
         for (let i = event.resultIndex; i < event.results.length; i++) {
-            interimTranscript += event.results[i][0].transcript;
+            currentTranscript += event.results[i][0].transcript;
         }
-        document.getElementById('live-transcript').textContent = interimTranscript;
         
-        const spoken = interimTranscript.toLowerCase().split(/\s+/);
-        spoken.forEach(word => {
-            const clean = word.replace(/[^\w\s]|_/g, "");
-            if (clean.length < 1) return;
-            
-            // Check current word and next 4 words (The "Sliding Window")
-            for (let i = 0; i < 5; i++) {
-                let idx = wordPointer + i;
-                if (idx < storyWordsClean.length && isMatch(clean, storyWordsClean[idx])) {
-                    document.getElementById(`word-${idx}`).className = "word correct";
-                    wordPointer = idx + 1;
-                    break;
-                }
-            }
-        });
+        // Update the visual box for the user
+        document.getElementById('live-transcript').textContent = currentTranscript;
+        
+        // Send the words to our processing engine
+        const words = currentTranscript.toLowerCase().split(/\s+/);
+        words.forEach(word => processWordLogic(cleanWord(word)));
     };
 
     recognition.onerror = (event) => {
         if (event.error === 'not-allowed') {
-            alert("Please allow microphone access in your browser settings!");
+            alert("Oops! Please click the lock icon in the address bar and allow the microphone so I can hear you read!");
             isActuallyReading = false;
         }
+        console.error("Speech Error:", event.error);
     };
 
+    // THE AUTO-RESTART FIX
     recognition.onend = () => {
-        // AUTO-RESTART LOOP
+        console.log("Mic timed out or disconnected.");
+        // If the user didn't click "Stop", but the mic turned off, restart it!
         if (isActuallyReading) {
+            console.log("Auto-restarting mic for mobile stability...");
             recognition.start();
         } else {
-            document.getElementById('mic-area').classList.remove('listening');
-            document.getElementById('mic-btn').textContent = "Click to Speak 🎤";
+            document.getElementById('mic-btn').classList.remove('listening');
         }
     };
-}
-
-function isMatch(spoken, target) {
-    if (target === "a" || target === "i") return spoken === target;
-    if (spoken === target || spoken === target + 's' || target === spoken + 's') return true;
-    // Fuzzy logic for long words (Giraffe, Astronaut, Nectar)
-    if (target.length > 5 && spoken.startsWith(target.substring(0, 4))) return true;
-    return false;
 }
 
 function toggleMic() {
     if (!recognition) initSpeech();
 
     if (isActuallyReading) {
+        // User clicked STOP
         isActuallyReading = false;
         recognition.stop();
         finishReading();
     } else {
+        // User clicked START
         isActuallyReading = true;
         recognition.start();
+        // UI feedback
+        document.getElementById('mic-btn').textContent = "I'm Listening... Click to Stop";
     }
 }
-
-function finishReading() {
-    let correct = 0;
-    storyWordsClean.forEach((_, i) => {
-        const el = document.getElementById(`word-${i}`);
-        if (el.classList.contains('correct')) correct++;
-        else el.className = "word wrong";
-    });
-
-    const acc = Math.round((correct / storyWordsClean.length) * 100);
-    document.getElementById('accuracy-display').textContent = `Accuracy: ${acc}%`;
-    document.getElementById('mic-btn').style.display = 'none';
-    document.getElementById('next-btn').style.display = 'block';
-}
-
-function nextStory() {
-    storyIdx = (storyIdx + 1) % STORIES[currentLevel].length;
-    loadStory();
-}
-</script>
-</body>
-</html>
