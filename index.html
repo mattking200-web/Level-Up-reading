@@ -20,6 +20,13 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 .word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: 0.2s;}
 .word.correct{color: var(--mint-dark); text-shadow: 1px 1px #dcfce7;}
 .word.wrong{color: var(--error); text-decoration: underline wavy var(--error);}
+
+/* New Transcript Style */
+.transcript-box {
+  margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 12px;
+  border: 1px solid #cbd5e1; font-size: 0.9rem; color: #475569; min-height: 40px;
+}
+
 .btn{font-family:'Fredoka One',cursive; padding:15px 25px; border-radius:15px; border:none; cursor:pointer; font-size:1.1rem; width:100%; transition: 0.2s;}
 .btn-mic{background:var(--sky); color:#fff; margin-bottom:10px;}
 .btn-mic.listening{background:var(--error); animation: pulse 1.5s infinite;}
@@ -50,7 +57,13 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         <div id="reading-view" style="display:none;">
             <h2 id="story-title" style="text-align:center; color:var(--sky-dark); margin-bottom:10px;"></h2>
             <div id="story-display" class="story-text"></div>
+            
             <button id="mic-btn" class="btn btn-mic" onclick="toggleMic()">Click to Speak 🎤</button>
+            
+            <div class="transcript-box">
+                <b>What I heard:</b> <span id="live-transcript">...</span>
+            </div>
+
             <div id="accuracy-display" style="text-align:center; font-weight:900; margin:10px;"></div>
             <button id="next-btn" class="btn btn-next" onclick="nextStory()">Next Story ➡️</button>
         </div>
@@ -59,6 +72,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 </div>
 
 <script>
+// (Stories AA, A, B, and C remain exactly as before...)
 const STORIES = {
   AA: [
     { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Hates it","Likes it","Is scared"],a:1}] },
@@ -111,6 +125,7 @@ function loadStory() {
     document.getElementById('lvl-display').textContent = currentLevel;
     document.getElementById('streak-display').textContent = streak;
     document.getElementById('accuracy-display').textContent = "";
+    document.getElementById('live-transcript').textContent = "..."; // Reset transcript
     document.getElementById('next-btn').style.display = 'none';
     document.getElementById('quiz-view').style.display = 'none';
     document.getElementById('mic-btn').style.display = 'block';
@@ -131,6 +146,10 @@ function toggleMic() {
             for (let i = 0; i < event.results.length; i++) {
                 fullTranscript += event.results[i][0].transcript.toLowerCase() + " ";
             }
+            
+            // Display the transcript so you can see what it thinks you said
+            document.getElementById('live-transcript').textContent = fullTranscript;
+
             const spokenArray = fullTranscript.trim().replace(/[.,!?;]/g, '').split(/\s+/);
             
             while (processedWordCount < spokenArray.length) {
