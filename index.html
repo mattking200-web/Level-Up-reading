@@ -1,31 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Reading Buddy 📚</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
-<style>
-:root { --mint:#4ade80; --sky:#38bdf8; --bg:#f0fdf4; --text:#1e293b; --error: #ef4444; }
-body{font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); padding:16px; display:flex; justify-content:center;}
-.card{background:#fff; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.1); width:100%; max-width:600px; border:2px solid #e2e8f0;}
-h1{font-family:'Fredoka One',cursive; color: #16a34a; text-align:center; margin-bottom:20px;}
-.story-text{font-size:1.8rem; line-height:1.6; font-weight:700; margin-bottom:20px; text-align:center;}
-.word{display:inline-block; margin-right:8px; color: #cbd5e1; border-bottom: 3px solid transparent;}
-.word.correct{color: #16a34a; border-bottom-color: var(--mint);}
-.word.wrong{color: var(--error); text-decoration: underline wavy var(--error);}
-.mic-btn{font-family:'Fredoka One',cursive; padding:20px; border-radius:15px; border:none; cursor:pointer; font-size:1.2rem; width:100%; background:var(--sky); color:#fff; box-shadow: 0 4px 0 #0284c7;}
-.mic-btn.listening{background:var(--error); box-shadow: 0 4px 0 #b91c1c;}
-.transcript-box {margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 2px solid #cbd5e1; min-height: 80px; font-size: 1.1rem;}
-.quiz-area{margin-top:20px; padding-top:20px; border-top:2px dashed #e2e8f0;}
-.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #eee; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; text-align:left;}
-.next-btn{background:var(--mint); color:#fff; margin-top:10px; display:none; font-family:'Fredoka One',cursive; padding:15px; border-radius:15px; border:none; width:100%; cursor:pointer;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Buddy 📚</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root { --mint:#4ade80; --sky:#38bdf8; --bg:#f0fdf4; --text:#1e293b; --error: #ef4444; }
+        body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); padding:16px; display:flex; justify-content:center; }
+        .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.1); width:100%; max-width:700px; border:2px solid #e2e8f0; }
+        h1 { font-family:'Fredoka One',cursive; color: #16a34a; text-align:center; margin-bottom:10px; }
+        .level-select { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 20px; font-size: 1rem; font-family: inherit; }
+        .story-text { font-size:1.6rem; line-height:1.6; font-weight:700; margin-bottom:20px; text-align:center; min-height: 100px; }
+        .word { display:inline-block; margin-right:8px; color: #cbd5e1; border-bottom: 3px solid transparent; transition: color 0.3s; }
+        .word.correct { color: #16a34a; border-bottom-color: var(--mint); }
+        .word.wrong { color: var(--error); text-decoration: underline wavy var(--error); }
+        .mic-btn { font-family:'Fredoka One',cursive; padding:20px; border-radius:15px; border:none; cursor:pointer; font-size:1.2rem; width:100%; background:var(--sky); color:#fff; box-shadow: 0 4px 0 #0284c7; margin-bottom: 15px; }
+        .mic-btn.listening { background:var(--error); box-shadow: 0 4px 0 #b91c1c; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        .transcript-box { margin-top: 10px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 2px solid #cbd5e1; min-height: 60px; font-size: 1.1rem; }
+        .quiz-area { margin-top:20px; padding-top:20px; border-top:2px dashed #e2e8f0; }
+        .opt-btn { display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #eee; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; text-align:left; font-family: inherit; }
+        .next-btn { background:var(--mint); color:#fff; margin-top:10px; display:none; font-family:'Fredoka One',cursive; padding:15px; border-radius:15px; border:none; width:100%; cursor:pointer; font-size: 1.1rem; }
+    </style>
 </head>
 <body>
 
 <div class="card">
     <h1>Reading Buddy 📚</h1>
+    
+    <select id="lvl-select" class="level-select" onchange="changeLevel()">
+        <option value="AA">Level AA - Basics</option>
+        <option value="C">Level C - Simple Sentences</option>
+        <option value="D">Level D - Early Reading</option>
+        <option value="G">Level G-M - Sequencing</option>
+        <option value="N">Level N-T - Inference</option>
+        <option value="U">Level U-Z - Main Idea</option>
+    </select>
+
     <h2 id="story-title" style="text-align:center; color:var(--sky);"></h2>
     <div id="story-display" class="story-text"></div>
     
@@ -33,7 +45,7 @@ h1{font-family:'Fredoka One',cursive; color: #16a34a; text-align:center; margin-
     
     <div class="transcript-box">
         <b>What I hear:</b><br>
-        <span id="live-transcript" style="color:#2563eb;">Waiting for you to speak...</span>
+        <span id="live-transcript" style="color:#2563eb;"><i>Waiting for you to speak...</i></span>
     </div>
 
     <div id="quiz-area" class="quiz-area" style="display:none;"></div>
@@ -41,37 +53,46 @@ h1{font-family:'Fredoka One',cursive; color: #16a34a; text-align:center; margin-
 </div>
 
 <script>
-// I have explicitly grouped the questions INSIDE the story object
-const ALL_STORIES = [
-    {
-        title: "The Tall Giraffe",
-        text: "The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.",
-        questions: [
-            {q: "What is the giraffe like?", opts: ["Short", "Tall"], a: 1},
-            {q: "What does it eat?", opts: ["Leaves", "Pizza"], a: 0}
-        ]
-    },
-    {
-        title: "The Busy Bees",
-        text: "The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.",
-        questions: [
-            {q: "What do bees make?", opts: ["Milk", "Honey"], a: 1},
-            {q: "Where do they fly?", opts: ["Flowers", "The Moon"], a: 0}
-        ]
-    }
-];
+const ALL_STORIES = {
+    AA: [
+        { title: "The Cat", text: "I see a cat. The cat is big. I like the cat.", q: [{q:"What do I see?", opts:["A dog","A cat"], a:1}, {q:"Is the cat big?", opts:["Yes","No"], a:0}] }
+    ],
+    C: [
+        { title: "The Tall Giraffe", text: "The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q: [{q: "What is the giraffe like?", opts: ["Short", "Tall"], a: 1}, {q: "What does it eat?", opts: ["Leaves", "Pizza"], a: 0}] }
+    ],
+    D: [
+        { title: "The Busy Bees", text: "The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q: [{q: "What do bees make?", opts: ["Milk", "Honey"], a: 1}, {q: "Where do they fly?", opts: ["Flowers", "The Moon"], a: 0}] },
+        { title: "A Trip to Space", text: "Astronauts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q: [{q: "How do they travel?", opts: ["Big rocket", "Fast car"], a: 0}, {q: "What do they look at?", opts: ["The sun", "Earth"], a: 1}] }
+    ],
+    G: [
+        { title: "The Garden Surprise", text: "First, Kim dug a hole in the dirt. Next, she dropped in a tiny seed. Finally, she watered it and waited for a flower to grow.", q: [{q: "What did Kim do first?", opts: ["Watered the dirt", "Dug a hole"], a: 1}, {q: "What was dropped in the hole?", opts: ["A seed", "A rock"], a: 0}] }
+    ],
+    N: [
+        { title: "The Missing Mitten", text: "Leo looked everywhere for his red mitten. He saw his dog, Buster, hiding under the porch with something fuzzy in his mouth. Leo sighed and reached for a dog treat.", q: [{q: "Why did Leo reach for a dog treat?", opts: ["He was hungry", "To trade for his mitten"], a: 1}, {q: "What color was the mitten?", opts: ["Red", "Blue"], a: 0}] }
+    ],
+    U: [
+        { title: "Ocean Giants", text: "Blue whales are the largest animals to ever live. They travel thousands of miles through deep water to find food. We must protect our oceans so these amazing giants have a safe home.", q: [{q: "What is the author's main purpose?", opts: ["To teach about whales and protecting them", "To explain how to swim"], a: 0}, {q: "How far do whales travel?", opts: ["Short distances", "Thousands of miles"], a: 1}] }
+    ]
+};
 
+let currentLevel = "AA";
 let storyIdx = 0;
 let recognition;
 let isReading = false;
 let cleanTargetWords = [];
 
+function changeLevel() {
+    currentLevel = document.getElementById('lvl-select').value;
+    storyIdx = 0;
+    loadStory();
+}
+
 function loadStory() {
-    const story = ALL_STORIES[storyIdx];
+    const story = ALL_STORIES[currentLevel][storyIdx];
     document.getElementById('story-title').innerText = story.title;
     document.getElementById('quiz-area').style.display = 'none';
     document.getElementById('next-story-btn').style.display = 'none';
-    document.getElementById('live-transcript').innerHTML = "<i>Waiting...</i>";
+    document.getElementById('live-transcript').innerHTML = "<i>Ready...</i>";
     
     const words = story.text.split(/\s+/);
     cleanTargetWords = words.map(w => w.replace(/[^\w]/g, "").toLowerCase());
@@ -81,44 +102,53 @@ function loadStory() {
     ).join(' ');
 }
 
-function toggleMic() {
-    if (!recognition) {
-        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new Speech();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        
-        recognition.onresult = (event) => {
-            let transcript = "";
-            for (let i = 0; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
-            }
-            
-            // UPDATE TRANSCRIPT BOX
-            document.getElementById('live-transcript').innerHTML = "<b>" + transcript + "</b>";
-            
-            // SCORE WORDS
-            const spokenWords = transcript.toLowerCase().split(/\s+/);
-            spokenWords.forEach(spoken => {
-                const s = spoken.replace(/[^\w]/g, "");
-                cleanTargetWords.forEach((target, index) => {
-                    if (isMatch(s, target)) {
-                        document.getElementById(`word-${index}`).className = "word correct";
-                    }
-                });
-            });
-        };
+function initSpeech() {
+    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Speech) {
+        alert("Speech Recognition not supported in this browser. Please use Chrome.");
+        return;
     }
+    recognition = new Speech();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        
+        // Robust transcript update
+        const displayBox = document.getElementById('live-transcript');
+        displayBox.innerText = transcript; 
+        
+        const spokenWords = transcript.toLowerCase().split(/\s+/);
+        spokenWords.forEach(spoken => {
+            const s = spoken.replace(/[^\w]/g, "");
+            cleanTargetWords.forEach((target, index) => {
+                if (isMatch(s, target)) {
+                    document.getElementById(`word-${index}`).className = "word correct";
+                }
+            });
+        });
+    };
+
+    recognition.onerror = (e) => console.error("Speech Error: ", e.error);
+    recognition.onend = () => { if (isReading) recognition.start(); };
+}
+
+function toggleMic() {
+    if (!recognition) initSpeech();
 
     if (isReading) {
-        recognition.stop();
         isReading = false;
+        recognition.stop();
         document.getElementById('mic-btn').innerText = "Click to Start Reading 🎤";
         document.getElementById('mic-btn').classList.remove('listening');
         showResults();
     } else {
-        recognition.start();
         isReading = true;
+        recognition.start();
         document.getElementById('mic-btn').innerText = "I'm Listening... Click to Stop";
         document.getElementById('mic-btn').classList.add('listening');
     }
@@ -126,24 +156,27 @@ function toggleMic() {
 
 function isMatch(s, t) {
     if (!s || !t) return false;
-    if (t.length <= 3) return s === t; // Protects against the "A" bug
+    if (t.length <= 3) return s === t; 
     return s === t || s === t + 's' || t === s + 's' || (t.length > 5 && s.startsWith(t.substring(0,4)));
 }
 
 function showResults() {
-    // Show Quiz
     const quizArea = document.getElementById('quiz-area');
-    const story = ALL_STORIES[storyIdx];
+    const story = ALL_STORIES[currentLevel][storyIdx];
     quizArea.innerHTML = "<h3>Quick Quiz!</h3>";
     
-    story.questions.forEach((qObj) => {
+    story.q.forEach((qObj) => {
         const div = document.createElement('div');
         div.innerHTML = `<p><b>${qObj.q}</b></p>`;
         qObj.opts.forEach((opt, i) => {
             const btn = document.createElement('button');
             btn.className = "opt-btn";
             btn.innerText = opt;
-            btn.onclick = () => btn.style.background = (i === qObj.a) ? "#dcfce7" : "#fee2e2";
+            btn.onclick = () => {
+                const buttons = div.querySelectorAll('.opt-btn');
+                buttons.forEach(b => b.disabled = true);
+                btn.style.background = (i === qObj.a) ? "#dcfce7" : "#fee2e2";
+            };
             div.appendChild(btn);
         });
         quizArea.appendChild(div);
@@ -154,12 +187,12 @@ function showResults() {
 }
 
 function nextStory() {
-    storyIdx = (storyIdx + 1) % ALL_STORIES.length;
+    storyIdx = (storyIdx + 1) % ALL_STORIES[currentLevel].length;
     loadStory();
 }
 
-loadStory(); // Start first story
+// Start
+loadStory();
 </script>
-
 </body>
 </html>
