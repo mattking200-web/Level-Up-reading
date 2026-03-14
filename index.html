@@ -32,20 +32,26 @@ h1{font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--mint-dark);tex
 
 .btn{
   font-family:inherit;font-weight:800;padding:14px 28px;border-radius:16px;
-  border:none;cursor:pointer;transition:transform 0.1s, box-shadow 0.1s;
+  border:none;cursor:pointer;transition:transform 0.1s;
   font-size:1.1rem;display:inline-flex;align-items:center;gap:8px;
 }
 .btn:active{transform:translateY(2px);}
 .btn-primary{background:var(--mint);color:#064e3b;box-shadow:0 4px 0 var(--mint-dark);}
 .btn-sky{background:var(--sky);color:#082f49;box-shadow:0 4px 0 var(--sky-dark);}
+.btn-orange{background:var(--orange);color:#fff;box-shadow:0 4px 0 #ea580c;}
+.btn-muted{background:var(--border);color:var(--muted);margin-top:10px;}
 
-/* Quiz Styling */
 .quiz-section{margin-top:30px;padding-top:30px;border-top:2px dashed var(--border);}
 .quiz-q{margin-bottom:20px;padding:15px;background:#f8fafc;border-radius:12px;}
 .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
 .opt-btn{padding:10px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-weight:700;}
 .opt-btn.correct{background:var(--mint);border-color:var(--mint-dark);}
 .opt-btn.wrong{background:var(--coral);border-color:#be123c;}
+
+.alert-box {
+    background: #fef9c3; border: 2px solid #facc15; padding: 15px; border-radius: 12px;
+    margin: 15px 0; text-align: center; font-weight: bold; color: #854d0e;
+}
 </style>
 </head>
 <body>
@@ -58,15 +64,15 @@ h1{font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--mint-dark);tex
   <div class="card">
     <div class="stats-bar">
       <div class="stat-pill level-badge" id="display-level">Level AA</div>
-      <div class="stat-pill">Streak: <span id="display-streak">0</span></div>
+      <div class="stat-pill">Progress: <span id="display-streak">0</span>/2</div>
     </div>
     
     <div id="setup-area">
-      <label>Choose Level:</label>
-      <select id="level-select" onchange="updateStoryList()"></select>
-      <br><br>
-      <label>Choose Story:</label>
-      <select id="story-select"></select>
+      <label><b>1. Choose Level:</b></label><br>
+      <select id="level-select" onchange="updateStoryList()" style="padding:8px; width:100%; border-radius:8px; margin:10px 0;"></select>
+      <br>
+      <label><b>2. Choose Story:</b></label><br>
+      <select id="story-select" style="padding:8px; width:100%; border-radius:8px; margin:10px 0;"></select>
       <br><br>
       <button class="btn btn-primary" onclick="startStory()">Start Reading! 🚀</button>
     </div>
@@ -74,51 +80,85 @@ h1{font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--mint-dark);tex
     <div id="reading-area" style="display:none;">
       <h2 id="story-title"></h2>
       <div id="text-container" class="story-text"></div>
-      <button id="mic-btn" class="btn btn-sky" onclick="toggleMic()">Click to Speak 🎤</button>
-      <div id="results-area" style="display:none; margin-top:20px;"></div>
-      <div id="quiz-area" class="quiz-section"></div>
+      
+      <div id="action-buttons" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="mic-btn" class="btn btn-sky" onclick="toggleMic()">Click to Speak 🎤</button>
+        <button id="next-btn" class="btn btn-orange" style="display:none;" onclick="loadNextStory()">Next Story ➡️</button>
+        <button class="btn btn-muted" onclick="goBack()">🏠 Menu</button>
+      </div>
+
+      <div id="results-area" style="display:none; margin-top:20px; font-weight:bold;"></div>
+      <div id="quiz-area" class="quiz-section" style="display:none;"></div>
     </div>
   </div>
 </div>
 
 <script>
+// Logic: 2 successes (>=80%) in a row at one level prompts the next level.
+const LEVEL_ORDER = ["AA", "A", "B", "C", "D", "E", "F"];
+
 const STORIES = {
   AA: [
     { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird","A fish"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big","Short"],a:2},{q:"How does the child feel about the cat?",opts:["They like it","They fear it","They ignore it","They hide"],a:0}] },
     { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Black","Red","Green"],a:2},{q:"What can the dog do?",opts:["Fly","Run","Sing","Swim"],a:1},{q:"How does the child feel about the dog?",opts:["They love it","They are sad","They are mad","They are scared"],a:0}] },
-    { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up","In the water"],a:2},{q:"What does the child see?",opts:["The moon","The sun","A star","A cloud"],a:1},{q:"What is the sun like?",opts:["Cold","Wet","Hot","Dark"],a:2}] }
+    { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up","In the water"],a:2},{q:"What does the child see?",opts:["The moon","The sun","A star","A cloud"],a:1},{q:"What is the sun like?",opts:["Cold","Wet","Hot","Dark"],a:2}] },
+    { title:"The Ball", text:"I have a ball. The ball is red. I kick the ball.", q:[{q:"What does the child have?",opts:["A bat","A ball","A kite","A box"],a:1},{q:"What color is the ball?",opts:["Green","Blue","Yellow","Red"],a:3},{q:"What does the child do to the ball?",opts:["Throws it","Kicks it","Catches it","Drops it"],a:1}] },
+    { title:"My Mom", text:"I see my mom. My mom is big. I love my mom.", q:[{q:"Who does the child see?",opts:["Dad","Teacher","Mom","Friend"],a:2},{q:"How is the mom described?",opts:["Small","Big","Fast","Funny"],a:1},{q:"How does the child feel?",opts:["Loves mom","Fears mom","Dislikes mom","Misses mom"],a:0}] },
   ],
   A: [
     { title:"I Can Jump", text:"I can jump. I can run. I can hop. I can play. It is fun.", q:[{q:"What is one thing the child can do?",opts:["Swim","Jump","Fly","Climb"],a:1},{q:"How is playing described?",opts:["Hard","Boring","Fun","Loud"],a:2},{q:"Which other action is mentioned?",opts:["Sleeping","Eating","Hop","Singing"],a:2}] },
-    { title:"The Big Box", text:"I see a big box. The box is red. I put my toys in the box. I like my box.", q:[{q:"What color is the box?",opts:["Blue","Green","Red","Yellow"],a:2},{q:"What goes inside the box?",opts:["Books","Toys","Food","Clothes"],a:1},{q:"How does the child feel about the box?",opts:["Hates it","Likes it","Fears it","Breaks it"],a:1}] }
+    { title:"The Big Box", text:"I see a big box. The box is red. I put my toys in the box. I like my box.", q:[{q:"What color is the box?",opts:["Blue","Green","Red","Yellow"],a:2},{q:"What goes inside the box?",opts:["Books","Toys","Food","Clothes"],a:1},{q:"How does the child feel about the box?",opts:["Hates it","Likes it","Fears it","Breaks it"],a:1}] },
+    { title:"My Hat", text:"I have a hat. My hat is blue. I put on my hat. I go out to play.", q:[{q:"What color is the hat?",opts:["Red","Green","Blue","Yellow"],a:2},{q:"What does the child do with the hat?",opts:["Loses it","Puts it on","Throws it","Hides it"],a:1},{q:"Where does the child go?",opts:["To bed","To school","To eat","Out to play"],a:3}] },
+    { title:"The Hen", text:"I see a hen. The hen is in the pen. The hen has eggs. I like the hen.", q:[{q:"Where is the hen?",opts:["In the barn","In the pen","In the yard","In the house"],a:1},{q:"What does the hen have?",opts:["Chicks","Feathers","Eggs","Corn"],a:2},{q:"Does the child like the hen?",opts:["Yes","No","Maybe","The story doesn't say"],a:0}] },
+    { title:"The Pig", text:"The pig is fat. The pig can dig. The pig is in the mud. I pat the pig.", q:[{q:"What does the pig look like?",opts:["Thin","Fat","Small","Tall"],a:1},{q:"Where is the pig?",opts:["In the barn","In the pen","In the mud","In the field"],a:2},{q:"What does the child do to the pig?",opts:["Feeds it","Pats it","Chases it","Washes it"],a:1}] },
   ],
   B: [
-    { title:"At the Park", text:"We go to the park. I see a slide. I can go up and down. My dad is here. We have fun at the park.", q:[{q:"Where do they go?",opts:["The beach","The park","The store","The school"],a:1},{q:"What does the child see?",opts:["A swing","A slide","A pond","A tree"],a:1},{q:"Who is with the child?",opts:["Mom","Friend","Dad","Teacher"],a:2}] }
+    { title:"At the Park", text:"We go to the park. I see a slide. I can go up and down. My dad is here. We have fun at the park.", q:[{q:"Where do they go?",opts:["The beach","The park","The store","The school"],a:1},{q:"What does the child see?",opts:["A swing","A slide","A pond","A tree"],a:1},{q:"Who is with the child?",opts:["Mom","Friend","Dad","Teacher"],a:2}] },
+    { title:"My Bed", text:"My bed is soft. I get in my bed at night. I put my head on the pillow. My mom says good night. I go to sleep.", q:[{q:"What is the bed like?",opts:["Hard","Soft","Cold","Bumpy"],a:1},{q:"Where does the child put their head?",opts:["A blanket","A toy","A pillow","The floor"],a:2},{q:"Who says good night?",opts:["Dad","Mom","Sister","Grandpa"],a:1}] },
+    { title:"The Duck", text:"I see a duck. The duck is in the pond. The duck has ducklings. They swim in the pond. I toss bread to the ducks.", q:[{q:"Where is the duck?",opts:["In the yard","On a nest","In the pond","In the grass"],a:2},{q:"What does the duck have?",opts:["Eggs","Ducklings","A house","Feathers"],a:1},{q:"What does the child toss?",opts:["Seeds","Fish","Bread","Corn"],a:2}] },
+    { title:"Rain Day", text:"It is raining today. I put on my boots. I jump in the puddle. Splash! My dog runs in the rain too.", q:[{q:"What is the weather?",opts:["Sunny","Windy","Snowy","Raining"],a:3},{q:"What does the child wear?",opts:["A coat","Boots","A hat","Gloves"],a:1},{q:"Who runs in the rain too?",opts:["A cat","A friend","The dog","Mom"],a:2}] },
+    { title:"My Cat Naps", text:"My cat likes to nap. She naps on my bed. She naps in the sun. She naps all day long. I pet my cat.", q:[{q:"What does the cat like to do?",opts:["Run","Play","Eat","Nap"],a:3},{q:"Where does the cat nap first?",opts:["On the floor","On the chair","On the bed","In a box"],a:2},{q:"What does the child do?",opts:["Feeds the cat","Pets the cat","Washes the cat","Plays with the cat"],a:1}] },
   ],
   C: [
-    { title:"The Nest", text:"A bird has a nest in the tree. The nest has three eggs in it. The eggs are small and blue. One day the eggs crack open. Three baby birds pop out. They are hungry. The mom bird brings food.", q:[{q:"Where is the nest?",opts:["On the ground","In a bush","In the tree","On the roof"],a:2},{q:"What color are the eggs?",opts:["White","Yellow","Green","Blue"],a:3},{q:"How many baby birds are there?",opts:["One","Two","Three","Four"],a:2}] }
+    { title:"The Nest", text:"A bird has a nest in the tree. The nest has three eggs in it. The eggs are small and blue. One day the eggs crack open. Three baby birds pop out. They are hungry. The mom bird brings food.", q:[{q:"Where is the nest?",opts:["On the ground","In a bush","In the tree","On the roof"],a:2},{q:"What color are the eggs?",opts:["White","Yellow","Green","Blue"],a:3},{q:"How many baby birds are there?",opts:["One","Two","Three","Four"],a:2}] },
+    { title:"We Bake", text:"Mom and I bake a cake. We mix the batter. We put it in the pan. We put it in the oven. It smells so good. When it is done, we put on the frosting. Then we eat it up.", q:[{q:"What do they bake?",opts:["Cookies","Bread","A pie","A cake"],a:3},{q:"Where does the cake cook?",opts:["On the stove","In the oven","In the fridge","On the table"],a:1},{q:"What goes on after it is done?",opts:["Sprinkles","Frosting","Jam","Sugar"],a:1}] },
+    { title:"My Bike", text:"I have a red bike. I ride my bike on the path. I go fast down the hill. My dad runs behind me. I do not fall. I am a good rider now.", q:[{q:"What color is the bike?",opts:["Blue","Green","Red","Yellow"],a:2},{q:"Who runs behind the child?",opts:["Mom","A friend","Sister","Dad"],a:3},{q:"Does the child fall?",opts:["Yes","No","Maybe","The story doesn't say"],a:1}] },
+    { title:"The Frog", text:"I see a green frog by the pond. The frog jumps on a lily pad. It sits very still. Then it jumps in the water. Splash! I look for the frog but it is gone.", q:[{q:"What color is the frog?",opts:["Brown","Yellow","Green","Blue"],a:2},{q:"Where does the frog jump first?",opts:["In the water","On a rock","On a lily pad","In the grass"],a:2},{q:"What happens at the end?",opts:["The frog eats","The frog is gone","The frog sings","The frog sleeps"],a:1}] },
+    { title:"Dog Tricks", text:"My dog can do tricks. She can sit and stay. She can shake my hand. She can roll over. I give her a treat when she does a good job. She wags her tail.", q:[{q:"What is one trick mentioned?",opts:["Fetch","Roll over","Jump","Bark"],a:1},{q:"What does the dog get for a good job?",opts:["A toy","A hug","A treat","A pat"],a:2},{q:"How does the dog show it is happy?",opts:["Barks","Runs","Wags her tail","Sleeps"],a:2}] },
   ],
   D: [
-    { title:"The Garden", text:"Grandma has a garden in her backyard. She grows tomatoes, beans, and flowers. Every morning she waters the plants. I help her pull the weeds. When the vegetables are ready, we pick them together. Then Grandma makes soup. It tastes so good because we grew it ourselves.", q:[{q:"Where is the garden?",opts:["Front yard","Backyard","Roof","Park"],a:1},{q:"What does Grandma make?",opts:["Salad","Stew","Soup","Sandwich"],a:2},{q:"What does the child help with?",opts:["Watering","Planting","Pulling weeds","Cooking"],a:2}] }
+    { title:"The Garden", text:"Grandma has a garden in her backyard. She grows tomatoes, beans, and flowers. Every morning she waters the plants. I help her pull the weeds. When the vegetables are ready, we pick them together. Then Grandma makes soup. It tastes so good because we grew it ourselves.", q:[{q:"Where is the garden?",opts:["Front yard","Backyard","Roof","Park"],a:1},{q:"What does Grandma make?",opts:["Salad","Stew","Soup","Sandwich"],a:2},{q:"What does the child help with?",opts:["Watering","Planting","Pulling weeds","Cooking"],a:2}] },
+    { title:"Lost Mitten", text:"One cold morning, I lost my mitten on the way to school. I looked in my bag. I looked in my coat pocket. I looked on the ground. My teacher helped me look. We found it under my chair. I was so happy. Now I keep my mittens in my pocket.", q:[{q:"When was the mitten lost?",opts:["At night","On a warm day","One cold morning","After school"],a:2},{q:"Who helped look?",opts:["A friend","Mom","Dad","The teacher"],a:3},{q:"Where was it found?",opts:["In the bag","Under the chair","On the ground","In the pocket"],a:1}] },
+    { title:"The Puppy", text:"We got a new puppy from the shelter. His name is Biscuit. He has brown spots and floppy ears. At first he was scared in our house. I sat on the floor and waited. He came over and licked my hand. Now Biscuit sleeps at the foot of my bed every night.", q:[{q:"Where did the puppy come from?",opts:["Pet store","Friend","Shelter","Farm"],a:2},{q:"What is the puppy's name?",opts:["Biscuit","Buddy","Bruno","Benji"],a:0},{q:"Where does he sleep now?",opts:["Kitchen","Dog bed","Foot of the bed","Hallway"],a:2}] },
+    { title:"Making Pizza", text:"Saturday is pizza night at our house. Dad rolls the dough into a big circle. Mom spreads the sauce on top. I get to put on the cheese. Then we each pick our toppings. I always pick peppers and mushrooms. The pizza goes in the oven. In twenty minutes dinner is ready.", q:[{q:"What night is pizza night?",opts:["Friday","Sunday","Saturday","Monday"],a:2},{q:"What is the child's job?",opts:["Roll dough","Spread sauce","Put on cheese","Cut the pizza"],a:2},{q:"What toppings does the child pick?",opts:["Pepperoni","Peppers and mushrooms","Olives","Sausage"],a:1}] },
+    { title:"A Rainy Day", text:"It rained all Saturday. I could not go outside to play. First I read two books. Then I painted a picture of a rainbow. Mom taught me how to make cookies. We played a board game until dinner. It turned out to be a great day even without sunshine.", q:[{q:"What did the child do first?",opts:["Painted","Read two books","Made cookies","Played a game"],a:1},{q:"What did the child paint?",opts:["A garden","A rainbow","A house","A cat"],a:1},{q:"What did they play until dinner?",opts:["Tag","Cards","A board game","Hide and seek"],a:2}] },
   ],
   E: [
-    { title:"The Science Fair", text:"Our class had a science fair. I made a volcano out of clay and painted it red and orange. I put baking soda inside. When I poured in the vinegar, it bubbled up like lava. Everyone gathered around to watch. My teacher said it was an excellent project. I felt very proud of all the work I had done.", q:[{q:"What did the child make?",opts:["A robot","A solar system","A volcano","A bridge"],a:2},{q:"What caused the bubbles?",opts:["Water","Vinegar","Juice","Soap"],a:1},{q:"How did the child feel?",opts:["Sad","Tired","Proud","Scared"],a:2}] }
+    { title:"The Science Fair", text:"Our class had a science fair. I made a volcano out of clay and painted it red and orange. I put baking soda inside. When I poured in the vinegar, it bubbled up like lava. Everyone gathered around to watch. My teacher said it was an excellent project. I felt very proud of all the work I had done.", q:[{q:"What did the child make?",opts:["A robot","A solar system","A volcano","A bridge"],a:2},{q:"What caused the bubbles?",opts:["Water","Vinegar","Juice","Soap"],a:1},{q:"How did the child feel?",opts:["Sad","Tired","Proud","Scared"],a:2}] },
+    { title:"The Library", text:"On Tuesday afternoons, Mom takes me to the library. The library is my favorite place. I love how quiet it is inside. The librarian knows my name and always finds books I will enjoy. Last week she found a whole series about a brave girl who solves mysteries. I have already read three of them.", q:[{q:"What day do they go to the library?",opts:["Monday","Tuesday","Wednesday","Friday"],a:1},{q:"What are the new books about?",opts:["Animals","Space","Mysteries","Sports"],a:2},{q:"How many has the child read?",opts:["One","Two","Three","Four"],a:2}] },
+    { title:"Camping Trip", text:"Our family went camping in the woods last summer. We set up our tent near a little stream. Dad taught me how to fish, and I caught my very first fish. At night we sat by the campfire. Dad told funny stories and Mom made hot chocolate. The stars looked so bright without city lights around.", q:[{q:"Where was the tent?",opts:["By a lake","Near a stream","In a field","On a hill"],a:1},{q:"What did the child catch?",opts:["A cold","A ball","A fish","A frog"],a:2},{q:"What did Mom make?",opts:["Hot dogs","Soup","Hot chocolate","Tea"],a:2}] },
+    { title:"My New School", text:"Starting at a new school felt really scary. I did not know anyone at all. On my first morning, a girl named Sofia sat next to me at lunch. She showed me where everything was and introduced me to her friends. By the end of the week, I was not scared anymore. Sofia and I are best friends now.", q:[{q:"How did the child feel at first?",opts:["Excited","Happy","Scared","Bored"],a:2},{q:"Who sat with the child at lunch?",opts:["Mia","Sofia","Sara","Lily"],a:1},{q:"What are they now?",opts:["Classmates","Neighbors","Best friends","Enemies"],a:2}] },
+    { title:"The Storm", text:"A big thunderstorm came through town last night. The thunder was so loud it woke me up. I saw lightning flash across the sky. I was a little frightened, so I went to my parents' room. Mom explained how lightning works. Dad showed me how to count the seconds between lightning and thunder. By the time it was over, I was not scared at all.", q:[{q:"What woke the child?",opts:["Rain","Wind","Thunder","Lightning"],a:2},{q:"Where did the child go?",opts:["Kitchen","Bathroom","Parents' room","Sibling's room"],a:2},{q:"What did Dad show the child?",opts:["How to sleep","How to count seconds","How to hide","How to paint"],a:1}] },
   ],
   F: [
-    { title:"My New Boots", text:"I got new boots for the rain. They are yellow and shiny. I put them on and ran outside. I jumped in a big puddle. Splash! Water went everywhere. My boots kept my feet dry. I love my new yellow boots.", q:[{q:"What color are the boots?",opts:["Red","Blue","Yellow","Green"],a:2},{q:"What did the child jump in?",opts:["Leaves","A puddle","Sand","Snow"],a:1},{q:"What stayed dry?",opts:["Hands","Coat","Feet","Bag"],a:2}] }
-  ]
+    { title:"My New Boots", text:"I got new boots for the rain. They are yellow and shiny. I put them on and ran outside. I jumped in a big puddle. Splash! Water went everywhere. My boots kept my feet dry. I love my new yellow boots.", q:[{q:"What color are the boots?",opts:["Red","Blue","Yellow","Green"],a:2},{q:"What did the child jump in?",opts:["Leaves","A puddle","Sand","Snow"],a:1},{q:"What stayed dry?",opts:["Hands","Coat","Feet","Bag"],a:2}] },
+    { title:"The Lost Kitten", text:"A little kitten sat under a bush. It was gray and very small. It made a soft crying sound. A girl named Mia heard it. She looked under the bush and found the kitten. She picked it up and held it close. She took it home and gave it some milk. The kitten stopped crying and went to sleep.", q:[{q:"Where was the kitten?",opts:["Under a tree","On a step","Under a bush","In a box"],a:2},{q:"Who found the kitten?",opts:["Sofia","Mia","Sara","Lily"],a:1},{q:"What did the kitten drink?",opts:["Water","Juice","Milk","Soup"],a:2}] },
+    { title:"At the Farm", text:"We go to a farm on a sunny day. I saw cows, pigs, and chickens. A big brown cow looked at me. I gave her some hay to eat. The chickens ran all around the yard. A baby pig played in the mud. It was a fun day at the farm.", q:[{q:"What kind of day was it?",opts:["Rainy","Cloudy","Windy","Sunny"],a:3},{q:"What did the cow eat?",opts:["Water","Corn","Hay","Apples"],a:2},{q:"What was the pig doing?",opts:["Sleeping","Eating","Playing in mud","Running"],a:2}] },
+    { title:"The Big Snowball", text:"After school, Sam and his sister went outside. There was lots of snow on the ground. They rolled a small ball of snow. They kept rolling it and rolling it. The ball got bigger and bigger. It was as big as a table! They put a scarf and a hat on it. Now it was a snowman.", q:[{q:"When did they go outside?",opts:["Before school","During lunch","After school","At night"],a:2},{q:"How big did the ball get?",opts:["Size of a ball","Size of a chair","Size of a table","Size of a house"],a:2},{q:"What did they make?",opts:["A fort","A snowman","A slide","A path"],a:1}] },
+    { title:"A Surprise for Dad", text:"It was Dad’s birthday. Mom and I made a big card. We used red and blue paint. We put glitter on it too. Then we baked a chocolate cake. When Dad came home, we shouted, 'Surprise!' Dad was very happy. He liked his card and the cake was yummy.", q:[{q:"Whose birthday was it?",opts:["Mom's","The child's","Dad's","Grandpa's"],a:2},{q:"What did they use on the card?",opts:["Stickers","Glitter","Crayons","Markers"],a:1},{q:"What kind of cake was it?",opts:["Vanilla","Strawberry","Chocolate","Lemon"],a:2}] },
+  ],
 };
 
 let currentLevel = 'AA';
-let currentStreak = 0;
-let currentStory = null;
+let currentStoryIndex = 0;
+let currentStreak = 0; // 2 in a row results in promotion
 let isRecording = false;
 let recognition = null;
+let transcriptText = "";
 
-// Initialize
 window.onload = () => {
   const lvSelect = document.getElementById('level-select');
-  Object.keys(STORIES).forEach(lv => {
+  LEVEL_ORDER.forEach(lv => {
     let opt = document.createElement('option');
     opt.value = lv; opt.textContent = lv;
     lvSelect.appendChild(opt);
@@ -131,33 +171,62 @@ window.onload = () => {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
+    
+    recognition.onresult = (event) => {
+      transcriptText = "";
+      for (let i = 0; i < event.results.length; i++) {
+        transcriptText += event.results[i][0].transcript;
+      }
+    };
   }
 };
 
 function updateStoryList() {
-  const lv = document.getElementById('level-select').value;
+  currentLevel = document.getElementById('level-select').value;
   const sSelect = document.getElementById('story-select');
   sSelect.innerHTML = '';
-  STORIES[lv].forEach((s, idx) => {
+  STORIES[currentLevel].forEach((s, idx) => {
     let opt = document.createElement('option');
     opt.value = idx; opt.textContent = s.title;
     sSelect.appendChild(opt);
   });
+  document.getElementById('display-level').textContent = "Level " + currentLevel;
+  currentStreak = 0; // Reset streak when manually changing levels
+  document.getElementById('display-streak').textContent = currentStreak;
 }
 
 function startStory() {
-  const lv = document.getElementById('level-select').value;
-  const idx = document.getElementById('story-select').value;
-  currentStory = STORIES[lv][idx];
-  
+  currentStoryIndex = parseInt(document.getElementById('story-select').value);
+  loadStory(currentLevel, currentStoryIndex);
+}
+
+function loadStory(lv, idx) {
+  const story = STORIES[lv][idx];
   document.getElementById('setup-area').style.display = 'none';
   document.getElementById('reading-area').style.display = 'block';
-  document.getElementById('story-title').textContent = currentStory.title;
+  document.getElementById('story-title').textContent = story.title;
   
   const container = document.getElementById('text-container');
-  container.innerHTML = currentStory.text.split(' ').map(w => `<span class="word">${w}</span>`).join(' ');
+  container.innerHTML = story.text.split(' ').map(w => `<span class="word">${w}</span>`).join(' ');
   
-  document.getElementById('quiz-area').innerHTML = '';
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('results-area').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('mic-btn').style.display = 'inline-flex';
+}
+
+function loadNextStory() {
+  currentStoryIndex++;
+  if (currentStoryIndex >= STORIES[currentLevel].length) {
+    currentStoryIndex = 0; // Wrap around if out of stories
+  }
+  loadStory(currentLevel, currentStoryIndex);
+}
+
+function goBack() {
+    if(isRecording) toggleMic();
+    document.getElementById('setup-area').style.display = 'block';
+    document.getElementById('reading-area').style.display = 'none';
 }
 
 function toggleMic() {
@@ -166,8 +235,9 @@ function toggleMic() {
     recognition.stop();
     isRecording = false;
     document.getElementById('mic-btn').textContent = "Click to Speak 🎤";
-    processResults();
+    setTimeout(processResults, 600);
   } else {
+    transcriptText = "";
     recognition.start();
     isRecording = true;
     document.getElementById('mic-btn').textContent = "Listening... Click to Stop ⏹️";
@@ -175,16 +245,68 @@ function toggleMic() {
 }
 
 function processResults() {
-  // Simple simulation of reading check
   const words = document.querySelectorAll('.word');
-  words.forEach(w => w.classList.add('ok')); // Mark all as read for demo
+  const spoken = transcriptText.toLowerCase();
+  let correctCount = 0;
+
+  words.forEach(wSpan => {
+    const wordClean = wSpan.textContent.toLowerCase().replace(/[.,!?;:]/g, "");
+    if (spoken.includes(wordClean)) {
+      wSpan.classList.add('ok');
+      correctCount++;
+    } else {
+      wSpan.classList.add('bad');
+    }
+  });
+
+  const accuracy = Math.round((correctCount / words.length) * 100);
+  const resArea = document.getElementById('results-area');
+  resArea.style.display = 'block';
+  
+  let resultMsg = `Accuracy: ${accuracy}%`;
+  
+  if(accuracy >= 80) {
+      currentStreak++;
+      resultMsg += " - Great reading! 🌟 Streak: " + currentStreak + "/2";
+  } else {
+      currentStreak = 0;
+      resultMsg += " - Keep practicing! 📚 Streak reset.";
+  }
+
+  resArea.innerHTML = resultMsg;
+  document.getElementById('display-streak').textContent = currentStreak;
+
+  // Level Up Logic
+  if (currentStreak >= 2) {
+      promoteUser();
+  }
+
+  document.getElementById('mic-btn').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'inline-flex';
   showQuiz();
 }
 
+function promoteUser() {
+    const currentIndex = LEVEL_ORDER.indexOf(currentLevel);
+    if (currentIndex < LEVEL_ORDER.length - 1) {
+        const nextLv = LEVEL_ORDER[currentIndex + 1];
+        const resArea = document.getElementById('results-area');
+        resArea.innerHTML += `<div class="alert-box">🏆 LEVEL UP! You are moving to Level ${nextLv}!</div>`;
+        
+        // Update state
+        currentLevel = nextLv;
+        currentStreak = 0;
+        document.getElementById('level-select').value = nextLv;
+        updateStoryList();
+    }
+}
+
 function showQuiz() {
+  const story = STORIES[currentLevel][currentStoryIndex];
   const area = document.getElementById('quiz-area');
+  area.style.display = 'block';
   area.innerHTML = '<h3>Comprehension Quiz</h3>';
-  currentStory.q.forEach((qObj, qIdx) => {
+  story.q.forEach((qObj, qIdx) => {
     const qDiv = document.createElement('div');
     qDiv.className = 'quiz-q';
     qDiv.innerHTML = `<p><strong>${qIdx+1}. ${qObj.q}</strong></p>`;
@@ -197,10 +319,13 @@ function showQuiz() {
       btn.className = 'opt-btn';
       btn.textContent = opt;
       btn.onclick = () => {
+        const allBtns = optsDiv.querySelectorAll('button');
+        allBtns.forEach(b => b.disabled = true);
         if (oIdx === qObj.a) {
           btn.classList.add('correct');
         } else {
           btn.classList.add('wrong');
+          allBtns[qObj.a].classList.add('correct');
         }
       };
       optsDiv.appendChild(btn);
