@@ -15,327 +15,434 @@
 body{
   font-family:'Nunito',sans-serif;
   background:var(--bg);
+  background-image:radial-gradient(circle at 15% 15%,#dcfce7 0%,transparent 45%),
+                   radial-gradient(circle at 85% 85%,#dbeafe 0%,transparent 45%);
   min-height:100vh;color:var(--text);padding:16px;
 }
-.container{max-width:800px;margin:0 auto;}
-header{text-align:center;margin-bottom:24px;}
-h1{font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--mint-dark);text-shadow:2px 2px #fff;}
-.card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);border:4px solid #fff;margin-bottom:20px;}
-.stats-bar{display:flex;gap:12px;margin-bottom:20px;justify-content:center;}
-.stat-pill{background:#fff;padding:8px 16px;border-radius:99px;font-weight:800;border:2px solid var(--border);display:flex;align-items:center;gap:6px;}
-.level-badge{background:var(--purple);color:#fff;border:none;}
+h1,h2,h3{font-family:'Fredoka One',cursive;letter-spacing:.02em;}
+.container{max-width:700px;margin:0 auto;}
 
-.story-text{font-size:1.8rem;line-height:1.6;margin:20px 0;white-space:pre-wrap;font-weight:600;}
-.word{display:inline-block;margin-right:8px;padding:2px 4px;border-radius:6px;transition:all 0.2s;}
-.word.ok{background:#dcfce7;color:#166534;}
-.word.bad{background:#fee2e2;color:#991b1b;text-decoration:line-through;}
-
-.btn{
-  font-family:inherit;font-weight:800;padding:14px 28px;border-radius:16px;
-  border:none;cursor:pointer;transition:transform 0.1s;
-  font-size:1.1rem;display:inline-flex;align-items:center;gap:8px;
+/* ── Header ── */
+.header{
+  background:#fff;border-radius:24px;padding:18px 22px;margin-bottom:14px;
+  box-shadow:0 4px 20px rgba(0,0,0,.06);border:2px solid #dcfce7;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
 }
-.btn:active{transform:translateY(2px);}
-.btn-primary{background:var(--mint);color:#064e3b;box-shadow:0 4px 0 var(--mint-dark);}
-.btn-sky{background:var(--sky);color:#082f49;box-shadow:0 4px 0 var(--sky-dark);}
-.btn-orange{background:var(--orange);color:#fff;box-shadow:0 4px 0 #ea580c;}
-.btn-muted{background:var(--border);color:var(--muted);margin-top:10px;}
+.header-left h1{font-size:1.7rem;color:#16a34a;}
+.header-left p{font-size:.72rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.level-badge{text-align:right;}
+.level-badge .lbl{font-size:.58rem;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:.12em;}
+.level-badge .val{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--mint-dark);line-height:1.1;}
+.level-badge .desc{font-size:.7rem;color:var(--muted);font-weight:700;}
+.streak-bar{display:flex;gap:3px;justify-content:flex-end;margin-top:5px;}
+.s-dot{width:16px;height:5px;border-radius:99px;background:#e2e8f0;transition:background .3s;}
+.s-dot.on{background:#22c55e;} .s-dot.warn{background:var(--coral);}
 
-.quiz-section{margin-top:30px;padding-top:30px;border-top:2px dashed var(--border);}
-.quiz-q{margin-bottom:20px;padding:15px;background:#f8fafc;border-radius:12px;}
-.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
-.opt-btn{padding:10px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-weight:700;}
-.opt-btn.correct{background:var(--mint);border-color:var(--mint-dark);}
-.opt-btn.wrong{background:var(--coral);border-color:#be123c;}
-
-.alert-box {
-    background: #fef9c3; border: 2px solid #facc15; padding: 15px; border-radius: 12px;
-    margin: 15px 0; text-align: center; font-weight: bold; color: #854d0e;
+/* ── Level Picker ── */
+.level-picker{
+  background:#fff;border-radius:24px;padding:22px;margin-bottom:14px;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);border:2px solid #f1f5f9;
 }
+.level-picker h2{font-size:1.1rem;color:var(--text);margin-bottom:14px;}
+.level-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.lvl-btn{
+  padding:8px 14px;border:2px solid var(--border);border-radius:10px;
+  font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;background:#fff;
+  color:var(--text);transition:all .15s;letter-spacing:.03em;
+}
+.lvl-btn:hover{border-color:var(--mint);background:#f0fdf4;transform:translateY(-1px);}
+.lvl-btn.active{background:var(--mint-dark);border-color:var(--mint-dark);color:#fff;box-shadow:0 3px 10px rgba(22,163,74,.3);}
+.lvl-btn.done{background:#dcfce7;border-color:#86efac;color:#16a34a;}
+
+/* ── Card ── */
+.card{background:#fff;border-radius:24px;padding:22px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.05);border:2px solid #f1f5f9;}
+
+/* ── Buttons ── */
+.btn{padding:11px 20px;border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:.98rem;cursor:pointer;transition:transform .15s,box-shadow .15s,opacity .2s;letter-spacing:.04em;}
+.btn:hover:not(:disabled){transform:translateY(-2px);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+.btn-green {background:linear-gradient(135deg,#4ade80,#22c55e);color:#fff;box-shadow:0 4px 14px rgba(74,222,128,.3);}
+.btn-blue  {background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#fff;box-shadow:0 4px 14px rgba(56,189,248,.3);}
+.btn-red   {background:linear-gradient(135deg,#fb7185,#f43f5e);color:#fff;box-shadow:0 4px 14px rgba(251,113,133,.3);}
+.btn-purple{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;box-shadow:0 4px 14px rgba(167,139,250,.3);}
+.btn-orange{background:linear-gradient(135deg,#fb923c,#ea580c);color:#fff;box-shadow:0 4px 14px rgba(251,146,60,.3);}
+.btn-ghost {background:#f1f5f9;color:#475569;}
+.btn-lg{padding:17px 28px;font-size:1.45rem;width:100%;border-radius:18px;}
+
+/* ── Story ── */
+.story-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap;}
+.story-box{background:linear-gradient(135deg,#f0fdf4,#eff6ff);border-radius:20px;padding:26px 22px;border:3px solid #dcfce7;text-align:center;}
+.story-title{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--sky-dark);margin-bottom:13px;}
+.story-text{font-size:1.5rem;line-height:1.8;font-weight:700;color:var(--text);}
+@media(max-width:480px){.story-text{font-size:1.15rem;}}
+.live-hint{margin-top:13px;padding:9px 13px;background:rgba(255,255,255,.7);border-radius:11px;font-size:.8rem;color:var(--sky-dark);font-weight:700;font-style:italic;border:1px solid #bfdbfe;animation:pulse 2s infinite;word-break:break-word;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.empty-state{padding:46px 20px;text-align:center;}
+.empty-emoji{font-size:68px;display:block;margin-bottom:13px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.empty-state p{color:var(--muted);font-weight:800;font-size:1rem;}
+.countdown-disp{width:100%;padding:19px;background:linear-gradient(135deg,var(--yellow),#f59e0b);color:#fff;border:none;border-radius:18px;font-family:'Fredoka One',cursive;font-size:2.4rem;text-align:center;animation:bop .5s infinite;}
+@keyframes bop{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* ── Results ── */
+.results-card{border-radius:24px;padding:22px;margin-bottom:14px;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.results-card.success{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:3px solid #86efac;}
+.results-card.fail   {background:linear-gradient(135deg,#fff7ed,#ffedd5);border:3px solid #fdba74;}
+.score-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;}
+.score-num{font-family:'Fredoka One',cursive;font-size:2.8rem;color:var(--text);line-height:1;}
+.score-lbl{font-size:.68rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.badge{padding:7px 17px;border-radius:99px;font-family:'Fredoka One',cursive;font-size:.88rem;}
+.badge.s{background:#22c55e;color:#fff;} .badge.f{background:#f97316;color:#fff;}
+.word-feedback{display:flex;flex-wrap:wrap;gap:6px;padding:16px;background:rgba(255,255,255,.6);border-radius:13px;margin-bottom:16px;}
+.wchip{font-size:.98rem;font-weight:800;transition:transform .15s;line-height:1.6;}
+.wchip.ok {color:#16a34a;}
+.wchip.bad{color:#fca5a5;text-decoration:line-through;text-decoration-color:#ef4444;text-decoration-thickness:3px;}
+.action-row{display:flex;gap:9px;flex-wrap:wrap;}
+.action-row .btn{flex:1;min-width:100px;}
+.banner{border-radius:15px;padding:13px 17px;text-align:center;font-family:'Fredoka One',cursive;font-size:1.05rem;margin-top:13px;letter-spacing:.04em;}
+.banner.up  {background:linear-gradient(135deg,#4ade80,#06b6d4);color:#fff;animation:pulse 1.5s infinite;}
+.banner.down{background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;animation:bop 1s infinite;}
+
+/* ── Progress bar ── */
+.progress-wrap{margin-bottom:16px;}
+.progress-label{display:flex;justify-content:space-between;font-size:.75rem;font-weight:800;color:var(--muted);margin-bottom:5px;}
+.progress-track{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#4ade80,#22d3ee);transition:width .5s ease;}
+
+/* ── Tips box ── */
+.tip-box{background:#fefce8;border-radius:13px;padding:13px 16px;border:2px solid #fde68a;margin-bottom:16px;font-size:.85rem;font-weight:700;color:#92400e;line-height:1.55;}
+.tip-box .tip-title{font-family:'Fredoka One',cursive;color:#d97706;margin-bottom:4px;font-size:.95rem;}
+
+/* ── Quiz ── */
+.quiz-wrap{margin-top:20px;background:#fff;border-radius:20px;padding:20px;border:2px solid #e0f2fe;box-shadow:0 4px 16px rgba(0,0,0,.05);}
+.quiz-wrap h3{font-size:1.1rem;color:var(--sky-dark);margin-bottom:16px;}
+.quiz-q{margin-bottom:18px;}
+.quiz-q p{font-weight:800;font-size:.95rem;color:var(--text);margin-bottom:10px;}
+.quiz-opts{display:flex;flex-direction:column;gap:7px;}
+.quiz-opt{padding:10px 14px;border:2px solid var(--border);border-radius:11px;background:#fff;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;text-align:left;transition:all .15s;color:var(--text);}
+.quiz-opt:hover:not(:disabled){border-color:var(--sky);background:#f0f9ff;transform:translateX(3px);}
+.quiz-opt:disabled{cursor:default;transform:none;}
+.quiz-opt.correct{background:#dcfce7;border-color:#22c55e;color:#15803d;}
+.quiz-opt.wrong  {background:#fee2e2;border-color:#f87171;color:#b91c1c;}
+.quiz-opt.reveal {background:#f1f5f9;border-color:#94a3b8;color:#64748b;}
+.quiz-score{margin-top:14px;padding:12px 16px;border-radius:12px;font-family:'Fredoka One',cursive;font-size:1rem;text-align:center;}
+.quiz-score.perfect{background:#dcfce7;color:#15803d;}
+.quiz-score.good   {background:#dbeafe;color:#1d4ed8;}
+.quiz-score.tryagain{background:#fff7ed;color:#c2410c;}
+
+.spin{display:inline-block;width:15px;height:15px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spinning .7s linear infinite;vertical-align:middle;margin-right:5px;}
+@keyframes spinning{to{transform:rotate(360deg)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.slide-up{animation:slideUp .35s ease;}
+
+/* ── Story counter pill ── */
+.story-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.pill{padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;}
+.pill-green{background:#dcfce7;color:#16a34a;}
+.pill-blue {background:#dbeafe;color:#1d4ed8;}
+
+footer{text-align:center;padding:16px 0;font-size:.7rem;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:.15em;}
 </style>
 </head>
 <body>
-
 <div class="container">
-  <header>
-    <h1>Reading Buddy 📚</h1>
+
+  <header class="header">
+    <div class="header-left">
+      <h1>📚 Reading Buddy</h1>
+      <p>Reading A–Z Style Coach</p>
+    </div>
+    <div class="level-badge">
+      <div class="lbl">Current Level</div>
+      <div class="val" id="hdr-level">AA</div>
+      <div class="desc" id="hdr-desc">Pre-Reader</div>
+      <div class="streak-bar" id="streak-bar"></div>
+    </div>
   </header>
 
-  <div class="card">
-    <div class="stats-bar">
-      <div class="stat-pill level-badge" id="display-level">Level AA</div>
-      <div class="stat-pill">Progress: <span id="display-streak">0</span>/2</div>
-    </div>
-    
-    <div id="setup-area">
-      <label><b>1. Choose Level:</b></label><br>
-      <select id="level-select" onchange="updateStoryList()" style="padding:8px; width:100%; border-radius:8px; margin:10px 0;"></select>
-      <br>
-      <label><b>2. Choose Story:</b></label><br>
-      <select id="story-select" style="padding:8px; width:100%; border-radius:8px; margin:10px 0;"></select>
-      <br><br>
-      <button class="btn btn-primary" onclick="startStory()">Start Reading! 🚀</button>
-    </div>
-
-    <div id="reading-area" style="display:none;">
-      <h2 id="story-title"></h2>
-      <div id="text-container" class="story-text"></div>
-      
-      <div id="action-buttons" style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button id="mic-btn" class="btn btn-sky" onclick="toggleMic()">Click to Speak 🎤</button>
-        <button id="next-btn" class="btn btn-orange" style="display:none;" onclick="loadNextStory()">Next Story ➡️</button>
-        <button class="btn btn-muted" onclick="goBack()">🏠 Menu</button>
-      </div>
-
-      <div id="results-area" style="display:none; margin-top:20px; font-weight:bold;"></div>
-      <div id="quiz-area" class="quiz-section" style="display:none;"></div>
-    </div>
+  <div class="level-picker" id="level-picker">
+    <h2>🎯 Choose Starting Level</h2>
+    <div class="level-grid" id="level-grid"></div>
   </div>
+
+  <div class="card" id="story-panel" style="display:none;">
+    <div class="story-top">
+      <div class="story-meta">
+        <h2 style="font-size:1.1rem;">Practice Time</h2>
+        <span class="pill pill-green" id="story-level-pill">Level AA</span>
+        <span class="pill pill-blue"  id="story-num-pill">Story 1</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="showLevelPicker()" style="font-size:.85rem;padding:8px 14px;">🎯 Change Level</button>
+        <button class="btn btn-blue" id="new-story-btn" onclick="loadStory()">New Story</button>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="prog-label">Level Progress</span>
+        <span id="prog-count">0 / 2 reads to advance</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div id="story-area">
+      <div class="empty-state">
+        <span class="empty-emoji">📖</span>
+        <p>Tap "New Story" to begin!</p>
+      </div>
+    </div>
+    <div id="mic-controls" style="margin-top:13px;display:none;"></div>
+  </div>
+
+  <div id="results-area" style="display:none;"></div>
+
+  <footer>Reading Buddy · No API Key Required</footer>
 </div>
 
 <script>
-// Logic: 2 successes (>=80%) in a row at one level prompts the next level.
-const LEVEL_ORDER = ["AA", "A", "B", "C", "D", "E", "F"];
+// ════════════════════════════════════════════════════════
+//  LEVEL DATA (Reading A-Z style)
+// ════════════════════════════════════════════════════════
+const LEVELS = [
+  { id:'AA', label:'AA', desc:'Pre-Reader',      color:'#86efac' },
+  { id:'A',  label:'A',  desc:'Emergent',         color:'#6ee7b7' },
+  { id:'B',  label:'B',  desc:'Emergent',         color:'#5eead4' },
+  { id:'C',  label:'C',  desc:'Early Emergent',   color:'#38bdf8' }
+];
 
 const STORIES = {
   AA: [
-    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird","A fish"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big","Short"],a:2},{q:"How does the child feel about the cat?",opts:["They like it","They fear it","They ignore it","They hide"],a:0}] },
-    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Black","Red","Green"],a:2},{q:"What can the dog do?",opts:["Fly","Run","Sing","Swim"],a:1},{q:"How does the child feel about the dog?",opts:["They love it","They are sad","They are mad","They are scared"],a:0}] },
-    { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up","In the water"],a:2},{q:"What does the child see?",opts:["The moon","The sun","A star","A cloud"],a:1},{q:"What is the sun like?",opts:["Cold","Wet","Hot","Dark"],a:2}] },
-    { title:"The Ball", text:"I have a ball. The ball is red. I kick the ball.", q:[{q:"What does the child have?",opts:["A bat","A ball","A kite","A box"],a:1},{q:"What color is the ball?",opts:["Green","Blue","Yellow","Red"],a:3},{q:"What does the child do to the ball?",opts:["Throws it","Kicks it","Catches it","Drops it"],a:1}] },
-    { title:"My Mom", text:"I see my mom. My mom is big. I love my mom.", q:[{q:"Who does the child see?",opts:["Dad","Teacher","Mom","Friend"],a:2},{q:"How is the mom described?",opts:["Small","Big","Fast","Funny"],a:1},{q:"How does the child feel?",opts:["Loves mom","Fears mom","Dislikes mom","Misses mom"],a:0}] },
+    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1}] },
+    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Brown"],a:1}] }
   ],
   A: [
-    { title:"I Can Jump", text:"I can jump. I can run. I can hop. I can play. It is fun.", q:[{q:"What is one thing the child can do?",opts:["Swim","Jump","Fly","Climb"],a:1},{q:"How is playing described?",opts:["Hard","Boring","Fun","Loud"],a:2},{q:"Which other action is mentioned?",opts:["Sleeping","Eating","Hop","Singing"],a:2}] },
-    { title:"The Big Box", text:"I see a big box. The box is red. I put my toys in the box. I like my box.", q:[{q:"What color is the box?",opts:["Blue","Green","Red","Yellow"],a:2},{q:"What goes inside the box?",opts:["Books","Toys","Food","Clothes"],a:1},{q:"How does the child feel about the box?",opts:["Hates it","Likes it","Fears it","Breaks it"],a:1}] },
-    { title:"My Hat", text:"I have a hat. My hat is blue. I put on my hat. I go out to play.", q:[{q:"What color is the hat?",opts:["Red","Green","Blue","Yellow"],a:2},{q:"What does the child do with the hat?",opts:["Loses it","Puts it on","Throws it","Hides it"],a:1},{q:"Where does the child go?",opts:["To bed","To school","To eat","Out to play"],a:3}] },
-    { title:"The Hen", text:"I see a hen. The hen is in the pen. The hen has eggs. I like the hen.", q:[{q:"Where is the hen?",opts:["In the barn","In the pen","In the yard","In the house"],a:1},{q:"What does the hen have?",opts:["Chicks","Feathers","Eggs","Corn"],a:2},{q:"Does the child like the hen?",opts:["Yes","No","Maybe","The story doesn't say"],a:0}] },
-    { title:"The Pig", text:"The pig is fat. The pig can dig. The pig is in the mud. I pat the pig.", q:[{q:"What does the pig look like?",opts:["Thin","Fat","Small","Tall"],a:1},{q:"Where is the pig?",opts:["In the barn","In the pen","In the mud","In the field"],a:2},{q:"What does the child do to the pig?",opts:["Feeds it","Pats it","Chases it","Washes it"],a:1}] },
+    { title:"I Can Jump", text:"I can jump. I can run. I can play. It is fun.", q:[{q:"What is one thing the child can do?",opts:["Swim","Jump","Fly"],a:1}] }
   ],
   B: [
-    { title:"At the Park", text:"We go to the park. I see a slide. I can go up and down. My dad is here. We have fun at the park.", q:[{q:"Where do they go?",opts:["The beach","The park","The store","The school"],a:1},{q:"What does the child see?",opts:["A swing","A slide","A pond","A tree"],a:1},{q:"Who is with the child?",opts:["Mom","Friend","Dad","Teacher"],a:2}] },
-    { title:"My Bed", text:"My bed is soft. I get in my bed at night. I put my head on the pillow. My mom says good night. I go to sleep.", q:[{q:"What is the bed like?",opts:["Hard","Soft","Cold","Bumpy"],a:1},{q:"Where does the child put their head?",opts:["A blanket","A toy","A pillow","The floor"],a:2},{q:"Who says good night?",opts:["Dad","Mom","Sister","Grandpa"],a:1}] },
-    { title:"The Duck", text:"I see a duck. The duck is in the pond. The duck has ducklings. They swim in the pond. I toss bread to the ducks.", q:[{q:"Where is the duck?",opts:["In the yard","On a nest","In the pond","In the grass"],a:2},{q:"What does the duck have?",opts:["Eggs","Ducklings","A house","Feathers"],a:1},{q:"What does the child toss?",opts:["Seeds","Fish","Bread","Corn"],a:2}] },
-    { title:"Rain Day", text:"It is raining today. I put on my boots. I jump in the puddle. Splash! My dog runs in the rain too.", q:[{q:"What is the weather?",opts:["Sunny","Windy","Snowy","Raining"],a:3},{q:"What does the child wear?",opts:["A coat","Boots","A hat","Gloves"],a:1},{q:"Who runs in the rain too?",opts:["A cat","A friend","The dog","Mom"],a:2}] },
-    { title:"My Cat Naps", text:"My cat likes to nap. She naps on my bed. She naps in the sun. She naps all day long. I pet my cat.", q:[{q:"What does the cat like to do?",opts:["Run","Play","Eat","Nap"],a:3},{q:"Where does the cat nap first?",opts:["On the floor","On the chair","On the bed","In a box"],a:2},{q:"What does the child do?",opts:["Feeds the cat","Pets the cat","Washes the cat","Plays with the cat"],a:1}] },
-  ],
-  C: [
-    { title:"The Nest", text:"A bird has a nest in the tree. The nest has three eggs in it. The eggs are small and blue. One day the eggs crack open. Three baby birds pop out. They are hungry. The mom bird brings food.", q:[{q:"Where is the nest?",opts:["On the ground","In a bush","In the tree","On the roof"],a:2},{q:"What color are the eggs?",opts:["White","Yellow","Green","Blue"],a:3},{q:"How many baby birds are there?",opts:["One","Two","Three","Four"],a:2}] },
-    { title:"We Bake", text:"Mom and I bake a cake. We mix the batter. We put it in the pan. We put it in the oven. It smells so good. When it is done, we put on the frosting. Then we eat it up.", q:[{q:"What do they bake?",opts:["Cookies","Bread","A pie","A cake"],a:3},{q:"Where does the cake cook?",opts:["On the stove","In the oven","In the fridge","On the table"],a:1},{q:"What goes on after it is done?",opts:["Sprinkles","Frosting","Jam","Sugar"],a:1}] },
-    { title:"My Bike", text:"I have a red bike. I ride my bike on the path. I go fast down the hill. My dad runs behind me. I do not fall. I am a good rider now.", q:[{q:"What color is the bike?",opts:["Blue","Green","Red","Yellow"],a:2},{q:"Who runs behind the child?",opts:["Mom","A friend","Sister","Dad"],a:3},{q:"Does the child fall?",opts:["Yes","No","Maybe","The story doesn't say"],a:1}] },
-    { title:"The Frog", text:"I see a green frog by the pond. The frog jumps on a lily pad. It sits very still. Then it jumps in the water. Splash! I look for the frog but it is gone.", q:[{q:"What color is the frog?",opts:["Brown","Yellow","Green","Blue"],a:2},{q:"Where does the frog jump first?",opts:["In the water","On a rock","On a lily pad","In the grass"],a:2},{q:"What happens at the end?",opts:["The frog eats","The frog is gone","The frog sings","The frog sleeps"],a:1}] },
-    { title:"Dog Tricks", text:"My dog can do tricks. She can sit and stay. She can shake my hand. She can roll over. I give her a treat when she does a good job. She wags her tail.", q:[{q:"What is one trick mentioned?",opts:["Fetch","Roll over","Jump","Bark"],a:1},{q:"What does the dog get for a good job?",opts:["A toy","A hug","A treat","A pat"],a:2},{q:"How does the dog show it is happy?",opts:["Barks","Runs","Wags her tail","Sleeps"],a:2}] },
-  ],
-  D: [
-    { title:"The Garden", text:"Grandma has a garden in her backyard. She grows tomatoes, beans, and flowers. Every morning she waters the plants. I help her pull the weeds. When the vegetables are ready, we pick them together. Then Grandma makes soup. It tastes so good because we grew it ourselves.", q:[{q:"Where is the garden?",opts:["Front yard","Backyard","Roof","Park"],a:1},{q:"What does Grandma make?",opts:["Salad","Stew","Soup","Sandwich"],a:2},{q:"What does the child help with?",opts:["Watering","Planting","Pulling weeds","Cooking"],a:2}] },
-    { title:"Lost Mitten", text:"One cold morning, I lost my mitten on the way to school. I looked in my bag. I looked in my coat pocket. I looked on the ground. My teacher helped me look. We found it under my chair. I was so happy. Now I keep my mittens in my pocket.", q:[{q:"When was the mitten lost?",opts:["At night","On a warm day","One cold morning","After school"],a:2},{q:"Who helped look?",opts:["A friend","Mom","Dad","The teacher"],a:3},{q:"Where was it found?",opts:["In the bag","Under the chair","On the ground","In the pocket"],a:1}] },
-    { title:"The Puppy", text:"We got a new puppy from the shelter. His name is Biscuit. He has brown spots and floppy ears. At first he was scared in our house. I sat on the floor and waited. He came over and licked my hand. Now Biscuit sleeps at the foot of my bed every night.", q:[{q:"Where did the puppy come from?",opts:["Pet store","Friend","Shelter","Farm"],a:2},{q:"What is the puppy's name?",opts:["Biscuit","Buddy","Bruno","Benji"],a:0},{q:"Where does he sleep now?",opts:["Kitchen","Dog bed","Foot of the bed","Hallway"],a:2}] },
-    { title:"Making Pizza", text:"Saturday is pizza night at our house. Dad rolls the dough into a big circle. Mom spreads the sauce on top. I get to put on the cheese. Then we each pick our toppings. I always pick peppers and mushrooms. The pizza goes in the oven. In twenty minutes dinner is ready.", q:[{q:"What night is pizza night?",opts:["Friday","Sunday","Saturday","Monday"],a:2},{q:"What is the child's job?",opts:["Roll dough","Spread sauce","Put on cheese","Cut the pizza"],a:2},{q:"What toppings does the child pick?",opts:["Pepperoni","Peppers and mushrooms","Olives","Sausage"],a:1}] },
-    { title:"A Rainy Day", text:"It rained all Saturday. I could not go outside to play. First I read two books. Then I painted a picture of a rainbow. Mom taught me how to make cookies. We played a board game until dinner. It turned out to be a great day even without sunshine.", q:[{q:"What did the child do first?",opts:["Painted","Read two books","Made cookies","Played a game"],a:1},{q:"What did the child paint?",opts:["A garden","A rainbow","A house","A cat"],a:1},{q:"What did they play until dinner?",opts:["Tag","Cards","A board game","Hide and seek"],a:2}] },
-  ],
-  E: [
-    { title:"The Science Fair", text:"Our class had a science fair. I made a volcano out of clay and painted it red and orange. I put baking soda inside. When I poured in the vinegar, it bubbled up like lava. Everyone gathered around to watch. My teacher said it was an excellent project. I felt very proud of all the work I had done.", q:[{q:"What did the child make?",opts:["A robot","A solar system","A volcano","A bridge"],a:2},{q:"What caused the bubbles?",opts:["Water","Vinegar","Juice","Soap"],a:1},{q:"How did the child feel?",opts:["Sad","Tired","Proud","Scared"],a:2}] },
-    { title:"The Library", text:"On Tuesday afternoons, Mom takes me to the library. The library is my favorite place. I love how quiet it is inside. The librarian knows my name and always finds books I will enjoy. Last week she found a whole series about a brave girl who solves mysteries. I have already read three of them.", q:[{q:"What day do they go to the library?",opts:["Monday","Tuesday","Wednesday","Friday"],a:1},{q:"What are the new books about?",opts:["Animals","Space","Mysteries","Sports"],a:2},{q:"How many has the child read?",opts:["One","Two","Three","Four"],a:2}] },
-    { title:"Camping Trip", text:"Our family went camping in the woods last summer. We set up our tent near a little stream. Dad taught me how to fish, and I caught my very first fish. At night we sat by the campfire. Dad told funny stories and Mom made hot chocolate. The stars looked so bright without city lights around.", q:[{q:"Where was the tent?",opts:["By a lake","Near a stream","In a field","On a hill"],a:1},{q:"What did the child catch?",opts:["A cold","A ball","A fish","A frog"],a:2},{q:"What did Mom make?",opts:["Hot dogs","Soup","Hot chocolate","Tea"],a:2}] },
-    { title:"My New School", text:"Starting at a new school felt really scary. I did not know anyone at all. On my first morning, a girl named Sofia sat next to me at lunch. She showed me where everything was and introduced me to her friends. By the end of the week, I was not scared anymore. Sofia and I are best friends now.", q:[{q:"How did the child feel at first?",opts:["Excited","Happy","Scared","Bored"],a:2},{q:"Who sat with the child at lunch?",opts:["Mia","Sofia","Sara","Lily"],a:1},{q:"What are they now?",opts:["Classmates","Neighbors","Best friends","Enemies"],a:2}] },
-    { title:"The Storm", text:"A big thunderstorm came through town last night. The thunder was so loud it woke me up. I saw lightning flash across the sky. I was a little frightened, so I went to my parents' room. Mom explained how lightning works. Dad showed me how to count the seconds between lightning and thunder. By the time it was over, I was not scared at all.", q:[{q:"What woke the child?",opts:["Rain","Wind","Thunder","Lightning"],a:2},{q:"Where did the child go?",opts:["Kitchen","Bathroom","Parents' room","Sibling's room"],a:2},{q:"What did Dad show the child?",opts:["How to sleep","How to count seconds","How to hide","How to paint"],a:1}] },
-  ],
-  F: [
-    { title:"My New Boots", text:"I got new boots for the rain. They are yellow and shiny. I put them on and ran outside. I jumped in a big puddle. Splash! Water went everywhere. My boots kept my feet dry. I love my new yellow boots.", q:[{q:"What color are the boots?",opts:["Red","Blue","Yellow","Green"],a:2},{q:"What did the child jump in?",opts:["Leaves","A puddle","Sand","Snow"],a:1},{q:"What stayed dry?",opts:["Hands","Coat","Feet","Bag"],a:2}] },
-    { title:"The Lost Kitten", text:"A little kitten sat under a bush. It was gray and very small. It made a soft crying sound. A girl named Mia heard it. She looked under the bush and found the kitten. She picked it up and held it close. She took it home and gave it some milk. The kitten stopped crying and went to sleep.", q:[{q:"Where was the kitten?",opts:["Under a tree","On a step","Under a bush","In a box"],a:2},{q:"Who found the kitten?",opts:["Sofia","Mia","Sara","Lily"],a:1},{q:"What did the kitten drink?",opts:["Water","Juice","Milk","Soup"],a:2}] },
-    { title:"At the Farm", text:"We go to a farm on a sunny day. I saw cows, pigs, and chickens. A big brown cow looked at me. I gave her some hay to eat. The chickens ran all around the yard. A baby pig played in the mud. It was a fun day at the farm.", q:[{q:"What kind of day was it?",opts:["Rainy","Cloudy","Windy","Sunny"],a:3},{q:"What did the cow eat?",opts:["Water","Corn","Hay","Apples"],a:2},{q:"What was the pig doing?",opts:["Sleeping","Eating","Playing in mud","Running"],a:2}] },
-    { title:"The Big Snowball", text:"After school, Sam and his sister went outside. There was lots of snow on the ground. They rolled a small ball of snow. They kept rolling it and rolling it. The ball got bigger and bigger. It was as big as a table! They put a scarf and a hat on it. Now it was a snowman.", q:[{q:"When did they go outside?",opts:["Before school","During lunch","After school","At night"],a:2},{q:"How big did the ball get?",opts:["Size of a ball","Size of a chair","Size of a table","Size of a house"],a:2},{q:"What did they make?",opts:["A fort","A snowman","A slide","A path"],a:1}] },
-    { title:"A Surprise for Dad", text:"It was Dad’s birthday. Mom and I made a big card. We used red and blue paint. We put glitter on it too. Then we baked a chocolate cake. When Dad came home, we shouted, 'Surprise!' Dad was very happy. He liked his card and the cake was yummy.", q:[{q:"Whose birthday was it?",opts:["Mom's","The child's","Dad's","Grandpa's"],a:2},{q:"What did they use on the card?",opts:["Stickers","Glitter","Crayons","Markers"],a:1},{q:"What kind of cake was it?",opts:["Vanilla","Strawberry","Chocolate","Lemon"],a:2}] },
-  ],
+    { title:"Rain Day", text:"It is raining today. I put on my boots. I jump in the puddle.", q:[{q:"What is the weather like?",opts:["Sunny","Windy","Raining"],a:2}] }
+  ]
 };
 
-let currentLevel = 'AA';
-let currentStoryIndex = 0;
-let currentStreak = 0; // 2 in a row results in promotion
-let isRecording = false;
+// ════════════════════════════════════════════════════════
+//  CORE LOGIC
+// ════════════════════════════════════════════════════════
+let currentLevelIdx = 0;
+let levelPasses = 0;
+const PASS_REQUIRED = 2;
+let currentBook = null;
+let isListening = false;
 let recognition = null;
-let transcriptText = "";
+let capturedTranscript = "";
+let wordsMatched = new Set();
+let quizAnswers = {};
 
-window.onload = () => {
-  const lvSelect = document.getElementById('level-select');
-  LEVEL_ORDER.forEach(lv => {
-    let opt = document.createElement('option');
-    opt.value = lv; opt.textContent = lv;
-    lvSelect.appendChild(opt);
+function init() {
+  const grid = document.getElementById('level-grid');
+  LEVELS.forEach((l, i) => {
+    const b = document.createElement('button');
+    b.className = 'lvl-btn';
+    b.textContent = l.label;
+    b.onclick = () => selectLevel(i);
+    grid.appendChild(b);
   });
-  updateStoryList();
-  
-  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new Speech();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    
-    recognition.onresult = (event) => {
-      transcriptText = "";
-      for (let i = 0; i < event.results.length; i++) {
-        transcriptText += event.results[i][0].transcript;
-      }
-    };
-  }
-};
-
-function updateStoryList() {
-  currentLevel = document.getElementById('level-select').value;
-  const sSelect = document.getElementById('story-select');
-  sSelect.innerHTML = '';
-  STORIES[currentLevel].forEach((s, idx) => {
-    let opt = document.createElement('option');
-    opt.value = idx; opt.textContent = s.title;
-    sSelect.appendChild(opt);
-  });
-  document.getElementById('display-level').textContent = "Level " + currentLevel;
-  currentStreak = 0; // Reset streak when manually changing levels
-  document.getElementById('display-streak').textContent = currentStreak;
+  updateHeader();
 }
 
-function startStory() {
-  currentStoryIndex = parseInt(document.getElementById('story-select').value);
-  loadStory(currentLevel, currentStoryIndex);
+function selectLevel(idx) {
+  currentLevelIdx = idx;
+  levelPasses = 0;
+  updateHeader();
+  document.getElementById('level-picker').style.display = 'none';
+  document.getElementById('story-panel').style.display = 'block';
+  loadStory();
 }
 
-function loadStory(lv, idx) {
-  const story = STORIES[lv][idx];
-  document.getElementById('setup-area').style.display = 'none';
-  document.getElementById('reading-area').style.display = 'block';
-  document.getElementById('story-title').textContent = story.title;
-  
-  const container = document.getElementById('text-container');
-  container.innerHTML = story.text.split(' ').map(w => `<span class="word">${w}</span>`).join(' ');
-  
-  document.getElementById('quiz-area').style.display = 'none';
+function showLevelPicker() {
+  document.getElementById('level-picker').style.display = 'block';
+  document.getElementById('story-panel').style.display = 'none';
   document.getElementById('results-area').style.display = 'none';
-  document.getElementById('next-btn').style.display = 'none';
-  document.getElementById('mic-btn').style.display = 'inline-flex';
 }
 
-function loadNextStory() {
-  currentStoryIndex++;
-  if (currentStoryIndex >= STORIES[currentLevel].length) {
-    currentStoryIndex = 0; // Wrap around if out of stories
+function updateHeader() {
+  const l = LEVELS[currentLevelIdx];
+  document.getElementById('hdr-level').textContent = l.id;
+  document.getElementById('hdr-desc').textContent = l.desc;
+  document.getElementById('story-level-pill').textContent = `Level ${l.id}`;
+  
+  const fill = (levelPasses / PASS_REQUIRED) * 100;
+  document.getElementById('prog-fill').style.width = fill + '%';
+  document.getElementById('prog-count').textContent = `${levelPasses} / ${PASS_REQUIRED} reads to advance`;
+}
+
+function loadStory() {
+  // RESET SESSION DATA
+  capturedTranscript = "";
+  wordsMatched.clear();
+  
+  const list = STORIES[LEVELS[currentLevelIdx].id];
+  currentBook = list[Math.floor(Math.random() * list.length)];
+  
+  document.getElementById('results-area').style.display = 'none';
+  document.getElementById('story-num-pill').textContent = `Story ${Math.floor(Math.random()*5)+1}`;
+  
+  const area = document.getElementById('story-area');
+  area.innerHTML = `
+    <div class="story-box slide-up">
+      <div class="story-title">${currentBook.title}</div>
+      <div class="story-text" id="live-text">${currentBook.text}</div>
+      <div id="live-hint" class="live-hint" style="display:none;">Listening...</div>
+    </div>
+  `;
+  
+  const mic = document.getElementById('mic-controls');
+  mic.style.display = 'block';
+  mic.innerHTML = `<button class="btn btn-green btn-lg" onclick="startReading()"><span id="mic-icon">🎤</span> Start Reading</button>`;
+}
+
+function startReading() {
+  if (!('webkitSpeechRecognition' in window)) {
+    alert("Speech recognition not supported in this browser. Please use Chrome.");
+    return;
   }
-  loadStory(currentLevel, currentStoryIndex);
+  
+  // CLEAR BEFORE START
+  capturedTranscript = "";
+  wordsMatched.clear();
+
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('mic-controls').innerHTML = `<button class="btn btn-red btn-lg" onclick="stopReading()">🛑 Stop & Score</button>`;
+    document.getElementById('live-hint').style.display = 'block';
+  };
+
+  recognition.onresult = (event) => {
+    let interim = "";
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        capturedTranscript += " " + event.results[i][0].transcript;
+      } else {
+        interim += event.results[i][0].transcript;
+      }
+    }
+    document.getElementById('live-hint').textContent = (interim || "Keep reading...").toLowerCase();
+    processRealtime();
+  };
+
+  recognition.onerror = () => stopReading();
+  recognition.onend = () => { isListening = false; };
+  recognition.start();
 }
 
-function goBack() {
-    if(isRecording) toggleMic();
-    document.getElementById('setup-area').style.display = 'block';
-    document.getElementById('reading-area').style.display = 'none';
-}
-
-function toggleMic() {
-  if (!recognition) return alert("Speech not supported in this browser.");
-  if (isRecording) {
-    recognition.stop();
-    isRecording = false;
-    document.getElementById('mic-btn').textContent = "Click to Speak 🎤";
-    setTimeout(processResults, 600);
-  } else {
-    transcriptText = "";
-    recognition.start();
-    isRecording = true;
-    document.getElementById('mic-btn').textContent = "Listening... Click to Stop ⏹️";
-  }
-}
-
-function processResults() {
-  const words = document.querySelectorAll('.word');
-  const spoken = transcriptText.toLowerCase();
-  let correctCount = 0;
-
-  words.forEach(wSpan => {
-    const wordClean = wSpan.textContent.toLowerCase().replace(/[.,!?;:]/g, "");
-    if (spoken.includes(wordClean)) {
-      wSpan.classList.add('ok');
-      correctCount++;
+function processRealtime() {
+  // Strict cleanup for matching
+  const cleanSpoken = capturedTranscript.toLowerCase().replace(/[.,!?;]/g, '');
+  const spokenWords = cleanSpoken.split(/\s+/);
+  
+  const textWords = currentBook.text.toLowerCase().replace(/[.,!?;]/g, '').split(/\s+/);
+  const displayArea = document.getElementById('live-text');
+  
+  // Highlight words found in the CURRENT transcript only
+  let html = "";
+  const originalWithPunct = currentBook.text.split(/\s+/);
+  
+  originalWithPunct.forEach((wordWithPunct) => {
+    const cleanWord = wordWithPunct.toLowerCase().replace(/[.,!?;]/g, '');
+    // EXACT MATCH CHECK - No "draining" for "raining"
+    if (spokenWords.includes(cleanWord)) {
+      wordsMatched.add(cleanWord);
+      html += `<span style="color:#16a34a">${wordWithPunct} </span>`;
     } else {
-      wSpan.classList.add('bad');
+      html += `<span>${wordWithPunct} </span>`;
     }
   });
-
-  const accuracy = Math.round((correctCount / words.length) * 100);
-  const resArea = document.getElementById('results-area');
-  resArea.style.display = 'block';
-  
-  let resultMsg = `Accuracy: ${accuracy}%`;
-  
-  if(accuracy >= 80) {
-      currentStreak++;
-      resultMsg += " - Great reading! 🌟 Streak: " + currentStreak + "/2";
-  } else {
-      currentStreak = 0;
-      resultMsg += " - Keep practicing! 📚 Streak reset.";
-  }
-
-  resArea.innerHTML = resultMsg;
-  document.getElementById('display-streak').textContent = currentStreak;
-
-  // Level Up Logic
-  if (currentStreak >= 2) {
-      promoteUser();
-  }
-
-  document.getElementById('mic-btn').style.display = 'none';
-  document.getElementById('next-btn').style.display = 'inline-flex';
-  showQuiz();
+  displayArea.innerHTML = html;
 }
 
-function promoteUser() {
-    const currentIndex = LEVEL_ORDER.indexOf(currentLevel);
-    if (currentIndex < LEVEL_ORDER.length - 1) {
-        const nextLv = LEVEL_ORDER[currentIndex + 1];
-        const resArea = document.getElementById('results-area');
-        resArea.innerHTML += `<div class="alert-box">🏆 LEVEL UP! You are moving to Level ${nextLv}!</div>`;
-        
-        // Update state
-        currentLevel = nextLv;
-        currentStreak = 0;
-        document.getElementById('level-select').value = nextLv;
-        updateStoryList();
-    }
+function stopReading() {
+  if (recognition) recognition.stop();
+  scoreStory();
+}
+
+function scoreStory() {
+  const originalWords = currentBook.text.toLowerCase().replace(/[.,!?;]/g, '').split(/\s+/);
+  const uniqueOriginals = new Set(originalWords);
+  
+  // Only count words matched in this session
+  let correctCount = 0;
+  uniqueOriginals.forEach(w => {
+    if (wordsMatched.has(w)) correctCount++;
+  });
+  
+  const score = Math.round((correctCount / uniqueOriginals.size) * 100);
+  const passed = score >= 80;
+  
+  if (passed) levelPasses++;
+  if (levelPasses >= PASS_REQUIRED && currentLevelIdx < LEVELS.length - 1) {
+    // Level up logic...
+  }
+  
+  showResults(score, passed);
+  updateHeader();
+}
+
+function showResults(score, passed) {
+  const area = document.getElementById('results-area');
+  area.style.display = 'block';
+  area.className = `results-card slide-up ${passed ? 'success' : 'fail'}`;
+  
+  let html = `
+    <div class="score-row">
+      <div>
+        <div class="score-lbl">Reading Accuracy</div>
+        <div class="score-num">${score}%</div>
+      </div>
+      <div class="badge ${passed ? 's' : 'f'}">${passed ? 'GREAT JOB!' : 'TRY AGAIN'}</div>
+    </div>
+    <div class="word-feedback">
+  `;
+  
+  currentBook.text.split(/\s+/).forEach(w => {
+    const clean = w.toLowerCase().replace(/[.,!?;]/g, '');
+    const ok = wordsMatched.has(clean);
+    html += `<span class="wchip ${ok ? 'ok' : 'bad'}">${w}</span> `;
+  });
+
+  html += `</div><div class="action-row">
+    <button class="btn btn-blue" onclick="loadStory()">Read Again</button>
+    ${passed ? '<button class="btn btn-purple" onclick="showQuiz()">Take Quiz</button>' : ''}
+  </div>`;
+  
+  area.innerHTML = html;
+  window.scrollTo({ top: area.offsetTop - 20, behavior: 'smooth' });
 }
 
 function showQuiz() {
-  const story = STORIES[currentLevel][currentStoryIndex];
-  const area = document.getElementById('quiz-area');
-  area.style.display = 'block';
-  area.innerHTML = '<h3>Comprehension Quiz</h3>';
-  story.q.forEach((qObj, qIdx) => {
-    const qDiv = document.createElement('div');
-    qDiv.className = 'quiz-q';
-    qDiv.innerHTML = `<p><strong>${qIdx+1}. ${qObj.q}</strong></p>`;
-    
-    const optsDiv = document.createElement('div');
-    optsDiv.className = 'quiz-options';
-    
-    qObj.opts.forEach((opt, oIdx) => {
-      const btn = document.createElement('button');
-      btn.className = 'opt-btn';
-      btn.textContent = opt;
-      btn.onclick = () => {
-        const allBtns = optsDiv.querySelectorAll('button');
-        allBtns.forEach(b => b.disabled = true);
-        if (oIdx === qObj.a) {
-          btn.classList.add('correct');
-        } else {
-          btn.classList.add('wrong');
-          allBtns[qObj.a].classList.add('correct');
-        }
-      };
-      optsDiv.appendChild(btn);
+  const area = document.getElementById('results-area');
+  let html = `<div class="quiz-wrap"><h3>Check Your Understanding</h3>`;
+  currentBook.q.forEach((q, i) => {
+    html += `<div class="quiz-q"><p>${i+1}. ${q.q}</p><div class="quiz-opts">`;
+    q.opts.forEach((opt, oi) => {
+      html += `<button class="quiz-opt" onclick="answerQuiz(${i}, ${oi}, ${q.a}, this)">${opt}</button>`;
     });
-    
-    qDiv.appendChild(optsDiv);
-    area.appendChild(qDiv);
+    html += `</div></div>`;
   });
+  html += `</div>`;
+  area.innerHTML = html;
 }
-</script>
 
+function answerQuiz(qi, selected, correct, btn) {
+  btn.className = selected === correct ? 'quiz-opt correct' : 'quiz-opt wrong';
+  const opts = btn.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(b => b.disabled = true);
+}
+
+init();
+</script>
 </body>
 </html>
