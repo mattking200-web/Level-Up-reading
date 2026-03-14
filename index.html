@@ -15,23 +15,25 @@ body{font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); p
 .container{max-width:700px; margin:0 auto;}
 .card{background:#fff; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.1); border:2px solid var(--border); margin-bottom:20px;}
 h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center; margin-bottom:20px;}
+
 .stats{display:flex; justify-content:space-between; margin-bottom:20px; font-weight:800; background:#f8fafc; padding:10px; border-radius:12px;}
 .story-text{font-size:1.8rem; line-height:1.8; font-weight:700; margin-bottom:20px; text-align:center;}
 .word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: 0.2s; border-bottom: 3px solid transparent;}
 .word.correct{color: var(--mint-dark); border-bottom-color: var(--mint);}
 .word.wrong{color: var(--error); text-decoration: underline wavy var(--error);}
 
-/* Mic UI */
 .mic-area { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.pulse-dot { width: 12px; height: 12px; background: var(--error); border-radius: 50%; display: none; }
-.listening .pulse-dot { display: block; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.2); } 100% { opacity:1; transform:scale(1); } }
+.pulse-dot { width: 14px; height: 14px; background: var(--error); border-radius: 50%; display: none; }
+.listening .pulse-dot { display: block; animation: pulse 1.2s infinite; }
+@keyframes pulse { 0% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.3); } 100% { opacity:1; transform:scale(1); } }
 
 .btn{font-family:'Fredoka One',cursive; padding:18px; border-radius:15px; border:none; cursor:pointer; font-size:1.2rem; width:100%;}
-.btn-mic{background:var(--sky); color:#fff; transition: 0.2s;}
+.btn-mic{background:var(--sky); color:#fff; transition: 0.2s; box-shadow: 0 4px 0 var(--sky-dark);}
+.btn-mic:active{transform:translateY(2px); box-shadow: 0 2px 0 var(--sky-dark);}
 .btn-next{background:var(--mint); color:#fff; display:none; margin-top:15px;}
-.transcript-box {margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 12px; min-height: 50px; font-weight: 600;}
-.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #eee; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; text-align:left;}
+
+.transcript-box {margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 12px; min-height: 60px; font-weight: 600; border: 1px solid #cbd5e1; line-height: 1.4;}
+.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #eee; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; text-align:left; font-family: inherit;}
 </style>
 </head>
 <body>
@@ -45,12 +47,13 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <select id="lvl-select" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px;"></select>
+            <label><b>Choose Your Level:</b></label>
+            <select id="lvl-select" style="width:100%; padding:15px; margin:10px 0; border-radius:12px; font-size:1rem; border:2px solid var(--border);"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
 
         <div id="reading-view" style="display:none;">
-            <h2 id="story-title" style="text-align:center; color:var(--sky-dark);"></h2>
+            <h2 id="story-title" style="text-align:center; color:var(--sky-dark); margin-bottom:10px;"></h2>
             <div id="story-display" class="story-text"></div>
             
             <div id="mic-container" class="mic-area">
@@ -59,24 +62,51 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
             </div>
 
             <div class="transcript-box"><b>I hear:</b> <span id="live-transcript">...</span></div>
-            <div id="accuracy-display" style="text-align:center; font-weight:900; margin:15px;"></div>
+            <div id="accuracy-display" style="text-align:center; font-weight:900; margin:15px; font-size: 1.3rem;"></div>
             <button id="next-btn" class="btn btn-next" onclick="nextStory()">Next Story ➡️</button>
         </div>
-        <div id="quiz-view" style="display:none; margin-top:20px; border-top:2px dashed #eee; padding-top:20px;"></div>
+        <div id="quiz-view" style="display:none; margin-top:20px; border-top:2px dashed #ccc; padding-top:20px;"></div>
     </div>
 </div>
 
 <script>
 const STORIES = {
-  C: [{ title:"The Tall Giraffe", text:"The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q:[{q:"What is the giraffe like?",opts:["Short","Tall","Fat"],a:1},{q:"What does it eat?",opts:["Leaves","Grass","Meat"],a:0},{q:"Where does it live?",opts:["Zoo","Farm","House"],a:0}] }],
+  C: [
+    { 
+      title: "The Tall Giraffe", 
+      text: "The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", 
+      q: [
+        {q: "What is the giraffe like?", opts: ["Short", "Tall", "Blue"], a: 1},
+        {q: "Where does it live?", opts: ["The zoo", "A house", "The forest"], a: 0},
+        {q: "What does it eat?", opts: ["Pizza", "Leaves", "Candy"], a: 1}
+      ] 
+    }
+  ],
   D: [
-    { title:"The Busy Bees", text:"The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q:[{q:"Where do bees fly?",opts:["To the flowers","To the car","To the house"],a:0},{q:"What do they make?",opts:["Juice","Honey","Milk"],a:1},{q:"What is nectar?",opts:["Sweet liquid","A type of bee","A flower"],a:0}] },
-    { title:"A Trip to Space", text:"Astronauts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q:[{q:"Who travels in the rocket?",opts:["Sailors","Astronauts","Pilots"],a:1},{q:"Where do they go?",opts:["The sun","The moon","Mars"],a:1},{q:"How does Earth look?",opts:["Big","Small","Blue"],a:1}] }
+    { 
+      title: "The Busy Bees", 
+      text: "The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", 
+      q: [
+        {q: "Where do the bees fly?", opts: ["To the flowers", "To the cars", "To the moon"], a: 0},
+        {q: "What do they collect?", opts: ["Nectar", "Water", "Dirt"], a: 0},
+        {q: "What do they make?", opts: ["Milk", "Honey", "Jam"], a: 1}
+      ] 
+    },
+    { 
+      title: "A Trip to Space", 
+      text: "Astronauts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", 
+      q: [
+        {q: "What do they travel in?", opts: ["A car", "A rocket", "A boat"], a: 1},
+        {q: "Where do they go?", opts: ["The sun", "The moon", "Mars"], a: 1},
+        {q: "How does Earth look?", opts: ["Very small", "Very big", "Square"], a: 0}
+      ] 
+    }
   ]
 };
 
 let currentLevel = "D", storyIdx = 0, streak = 0, recognition, isReading = false, storyWordsClean = [];
 
+// Initialize Level Selection
 const select = document.getElementById('lvl-select');
 Object.keys(STORIES).forEach(lvl => {
     let opt = document.createElement('option'); opt.value = lvl; opt.textContent = "Level " + lvl; select.appendChild(opt);
@@ -98,6 +128,7 @@ function loadStory() {
     document.getElementById('next-btn').style.display = 'none';
     document.getElementById('quiz-view').style.display = 'none';
     document.getElementById('mic-btn').style.display = 'block';
+    document.getElementById('mic-btn').textContent = "Click to Speak 🎤";
     
     const words = story.text.trim().split(/\s+/);
     storyWordsClean = words.map(w => w.replace(/[^\w\s]|_/g, "").toLowerCase());
@@ -106,17 +137,24 @@ function loadStory() {
 
 function initSpeech() {
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Speech) { alert("Mic not supported on this browser."); return; }
     recognition = new Speech();
-    recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
+    recognition.continuous = true; 
+    recognition.interimResults = true; 
+    recognition.lang = 'en-US';
 
     recognition.onresult = (event) => {
-        let transcript = "";
-        for (let i = 0; i < event.results.length; i++) { transcript += event.results[i][0].transcript.toLowerCase() + " "; }
-        document.getElementById('live-transcript').textContent = transcript;
+        let fullTranscript = "";
+        for (let i = 0; i < event.results.length; i++) {
+            fullTranscript += event.results[i][0].transcript.toLowerCase() + " ";
+        }
+        // Update Transcript Box instantly
+        document.getElementById('live-transcript').innerText = fullTranscript;
         
-        const spokenWords = transcript.trim().split(/\s+/).map(w => w.replace(/[^\w\s]|_/g, ""));
+        const spokenWords = fullTranscript.trim().split(/\s+/).map(w => w.replace(/[^\w\s]|_/g, ""));
         
         spokenWords.forEach(spoken => {
+            if (!spoken) return;
             storyWordsClean.forEach((target, index) => {
                 if (isMatch(spoken, target)) {
                     document.getElementById(`word-${index}`).className = "word correct";
@@ -129,9 +167,12 @@ function initSpeech() {
 }
 
 function isMatch(spoken, target) {
-    if (target.length <= 3) return spoken === target; // Exact match for "a", "the", "in"
+    // Exact match for very short words to prevent "a" in "astronaut" bugs
+    if (target.length <= 3) return spoken === target; 
+    // Standard matches
     if (spoken === target || spoken === target + 's' || target === spoken + 's') return true;
-    if (target.length > 5 && spoken.includes(target.substring(0, 4))) return true; // Fuzzy for nectar/giraffe
+    // Fuzzy matching for longer words like giraffe, nectar, astronaut
+    if (target.length > 5 && (spoken.startsWith(target.substring(0, 4)) || target.startsWith(spoken.substring(0, 4)))) return true;
     return false;
 }
 
@@ -140,11 +181,12 @@ function toggleMic() {
     if (isReading) {
         isReading = false; recognition.stop();
         document.getElementById('mic-container').classList.remove('listening');
-        finishReading();
+        document.getElementById('mic-btn').textContent = "Calculating Score...";
+        setTimeout(finishReading, 800);
     } else {
         isReading = true; recognition.start();
         document.getElementById('mic-container').classList.add('listening');
-        document.getElementById('mic-btn').textContent = "Stop & Score ⏹️";
+        document.getElementById('mic-btn').textContent = "Stop & Check ⏹️";
     }
 }
 
@@ -164,15 +206,21 @@ function finishReading() {
 
 function showQuiz() {
     const quizView = document.getElementById('quiz-view');
-    quizView.innerHTML = "<h3>Check Your Understanding</h3>";
-    quizView.style.display = 'block';
     const story = STORIES[currentLevel][storyIdx];
+    quizView.innerHTML = `<h3>Quiz: ${story.title}</h3>`;
+    quizView.style.display = 'block';
+    
+    // Using the current story's specific question array
     story.q.forEach((qObj) => {
         const div = document.createElement('div');
-        div.innerHTML = `<p><b>${qObj.q}</b></p>`;
+        div.innerHTML = `<p style="margin-top:15px;"><b>${qObj.q}</b></p>`;
         qObj.opts.forEach((opt, oi) => {
             const b = document.createElement('button'); b.className="opt-btn"; b.textContent = opt;
-            b.onclick = () => b.style.background = (oi === qObj.a) ? "#dcfce7" : "#fee2e2";
+            b.onclick = () => {
+                const brothers = div.querySelectorAll('button');
+                brothers.forEach(btn => btn.disabled = true);
+                b.style.background = (oi === qObj.a) ? "#dcfce7" : "#fee2e2";
+            };
             div.appendChild(b);
         });
         quizView.appendChild(div);
@@ -182,7 +230,6 @@ function showQuiz() {
 function nextStory() {
     storyIdx = (storyIdx + 1) % STORIES[currentLevel].length;
     loadStory();
-    document.getElementById('mic-btn').textContent = "Click to Speak 🎤";
 }
 </script>
 </body>
