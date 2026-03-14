@@ -16,18 +16,18 @@ body{font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); p
 .card{background:#fff; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.1); border:2px solid var(--border); margin-bottom:20px;}
 h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center; margin-bottom:20px;}
 .stats{display:flex; justify-content:space-between; margin-bottom:20px; font-weight:800; background:#f8fafc; padding:10px; border-radius:12px;}
-.story-text{font-size:1.6rem; line-height:1.8; font-weight:700; margin-bottom:20px; text-align:center;}
-.word{display:inline-block; margin-right:6px; transition: color 0.3s;}
-.word.correct{color: #16a34a;}
+.story-text{font-size:1.8rem; line-height:1.8; font-weight:700; margin-bottom:20px; text-align:center;}
+.word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: color 0.3s;}
+.word.correct{color: #16a34a; text-shadow: 1px 1px #dcfce7;}
 .btn{font-family:'Fredoka One',cursive; padding:15px 25px; border-radius:15px; border:none; cursor:pointer; font-size:1.1rem; width:100%; transition: 0.2s;}
 .btn-mic{background:var(--sky); color:#fff; margin-bottom:10px;}
 .btn-mic.listening{background:#ef4444; animation: pulse 1.5s infinite;}
 .btn-next{background:var(--mint); color:#fff; display:none;}
 @keyframes pulse{ 0%{opacity:1;} 50%{opacity:0.7;} 100%{opacity:1;} }
 .quiz-section{margin-top:20px; border-top:2px dashed #e2e8f0; padding-top:20px;}
-.opt-btn{display:block; width:100%; padding:10px; margin:5px 0; border:2px solid #e2e8f0; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; text-align:left;}
-.opt-btn.correct-choice{background:#dcfce7; border-color:#22c55e;}
-.opt-btn.wrong-choice{background:#fee2e2; border-color:#f87171;}
+.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #e2e8f0; border-radius:12px; background:#fff; font-weight:700; cursor:pointer; text-align:left;}
+.opt-btn.correct-choice{background:#dcfce7; border-color:#22c55e; color:#166534;}
+.opt-btn.wrong-choice{background:#fee2e2; border-color:#f87171; color:#991b1b;}
 </style>
 </head>
 <body>
@@ -38,17 +38,17 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
     <div class="card">
         <div class="stats">
             <div>Level: <span id="lvl-display">AA</span></div>
-            <div>Progress: <span id="streak-display">0</span>/2</div>
+            <div>Streak: <span id="streak-display">0</span>/2</div>
         </div>
 
         <div id="setup-view">
-            <label><b>Select Level:</b></label>
-            <select id="lvl-select" style="width:100%; padding:10px; margin:10px 0; border-radius:10px;"></select>
+            <label><b>Choose Your Level:</b></label>
+            <select id="lvl-select" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; font-size:1rem;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
 
         <div id="reading-view" style="display:none;">
-            <h2 id="story-title" style="text-align:center; color:var(--sky-dark);"></h2>
+            <h2 id="story-title" style="text-align:center; color:var(--sky-dark); margin-bottom:15px;"></h2>
             <div id="story-display" class="story-text"></div>
             
             <button id="mic-btn" class="btn btn-mic" onclick="toggleMic()">Click to Speak 🎤</button>
@@ -64,10 +64,17 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 const STORIES = {
   AA: [
     { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Loves it","Fears it","Ignores it"],a:0}] },
-    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel?",opts:["Loves dog","Scared","Sad"],a:0}] }
+    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel?",opts:["Loves dog","Scared","Sad"],a:0}] },
+    { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up"],a:2},{q:"What is the sun like?",opts:["Cold","Wet","Hot"],a:2},{q:"What does the child see?",opts:["The sun","The moon","A star"],a:0}] },
+    { title:"The Ball", text:"I have a ball. The ball is red. I kick the ball.", q:[{q:"What does the child have?",opts:["A bat","A ball","A kite"],a:1},{q:"What color is the ball?",opts:["Green","Blue","Red"],a:2},{q:"What does the child do?",opts:["Throws it","Kicks it","Drops it"],a:1}] },
+    { title:"My Mom", text:"I see my mom. My mom is big. I love my mom.", q:[{q:"Who does the child see?",opts:["Dad","Teacher","Mom"],a:2},{q:"How is the mom described?",opts:["Small","Big","Fast"],a:1},{q:"How does the child feel?",opts:["Loves mom","Fears mom","Misses mom"],a:0}] }
   ],
   A: [
-    { title:"I Can Jump", text:"I can jump. I can run. I can play. It is fun.", q:[{q:"What can the child do?",opts:["Swim","Jump","Fly"],a:1},{q:"How is playing?",opts:["Hard","Boring","Fun"],a:2},{q:"What is another action?",opts:["Sleep","Run","Eat"],a:1}] }
+    { title:"I Can Jump", text:"I can jump. I can run. I can play. It is fun.", q:[{q:"What can the child do?",opts:["Swim","Jump","Fly"],a:1},{q:"How is playing?",opts:["Hard","Boring","Fun"],a:2},{q:"What is another action?",opts:["Sleep","Run","Eat"],a:1}] },
+    { title:"The Big Box", text:"I see a big box. The box is red. I put toys in the box.", q:[{q:"What size is the box?",opts:["Tiny","Big","Short"],a:1},{q:"What color is it?",opts:["Red","Blue","Green"],a:0},{q:"What goes inside?",opts:["Books","Toys","Food"],a:1}] },
+    { title:"My Hat", text:"I have a hat. My hat is blue. I go out to play.", q:[{q:"What does the child have?",opts:["A hat","A coat","A bag"],a:0},{q:"What color is it?",opts:["Red","Green","Blue"],a:2},{q:"Where do they go?",opts:["To bed","To school","Out to play"],a:2}] },
+    { title:"The Hen", text:"I see a hen. The hen is in the pen. The hen has eggs.", q:[{q:"Where is the hen?",opts:["In the barn","In the pen","In the tree"],a:1},{q:"What does the hen have?",opts:["Chicks","Feathers","Eggs"],a:2},{q:"What animal is it?",opts:["A duck","A hen","A pig"],a:1}] },
+    { title:"The Pig", text:"The pig is fat. The pig can dig. The pig is in the mud.", q:[{q:"What does the pig look like?",opts:["Thin","Fat","Small"],a:1},{q:"What can it do?",opts:["Fly","Dig","Sing"],a:1},{q:"Where is the pig?",opts:["In the grass","In the mud","In the water"],a:1}] }
   ]
 };
 
@@ -76,9 +83,8 @@ let storyIdx = 0;
 let streak = 0;
 let recognition;
 let isListening = false;
-let spokenWords = new Set();
+let currentWordPointer = 0; // TRACKS WHICH WORD THE USER SHOULD BE ON
 
-// Setup Levels
 const select = document.getElementById('lvl-select');
 Object.keys(STORIES).forEach(lvl => {
     let opt = document.createElement('option');
@@ -105,7 +111,7 @@ function loadStory() {
     document.getElementById('quiz-view').style.display = 'none';
     document.getElementById('mic-btn').style.display = 'block';
     
-    spokenWords.clear();
+    currentWordPointer = 0;
     const display = document.getElementById('story-display');
     display.innerHTML = story.text.split(' ').map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
 }
@@ -123,7 +129,7 @@ function toggleMic() {
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript.toLowerCase();
             }
-            checkText(transcript);
+            checkSequentialText(transcript);
         };
     }
 
@@ -141,16 +147,21 @@ function toggleMic() {
     }
 }
 
-function checkText(transcript) {
+function checkSequentialText(transcript) {
     const story = STORIES[currentLevel][storyIdx];
     const storyWords = story.text.toLowerCase().replace(/[.,!?;]/g, '').split(' ');
     const spokenArray = transcript.replace(/[.,!?;]/g, '').split(/\s+/);
 
-    storyWords.forEach((word, i) => {
-        // Strict word-for-word check
-        if (spokenArray.includes(word)) {
-            document.getElementById(`word-${i}`).classList.add('correct');
-            spokenWords.add(i);
+    // Look through what the user just said
+    spokenArray.forEach(spokenWord => {
+        if (currentWordPointer < storyWords.length) {
+            const targetWord = storyWords[currentWordPointer];
+            
+            // STRICT MATCH: Only advances if the spoken word matches the NEXT word in the story
+            if (spokenWord === targetWord) {
+                document.getElementById(`word-${currentWordPointer}`).classList.add('correct');
+                currentWordPointer++;
+            }
         }
     });
 }
@@ -158,7 +169,7 @@ function checkText(transcript) {
 function finishReading() {
     const story = STORIES[currentLevel][storyIdx];
     const totalWords = story.text.split(' ').length;
-    const accuracy = Math.round((spokenWords.size / totalWords) * 100);
+    const accuracy = Math.round((currentWordPointer / totalWords) * 100);
     
     const display = document.getElementById('accuracy-display');
     display.textContent = `Accuracy: ${accuracy}%`;
@@ -166,17 +177,18 @@ function finishReading() {
     if (accuracy >= 80) {
         streak++;
         display.innerHTML += "<br>🌟 Great Reading!";
-        if (streak >= 2) {
-            levelUp();
-        }
     } else {
         streak = 0;
-        display.innerHTML += "<br>📚 Try to read every word!";
+        display.innerHTML += "<br>📚 Try to read every word in order!";
     }
     
     document.getElementById('streak-display').textContent = streak;
     document.getElementById('mic-btn').style.display = 'none';
     document.getElementById('next-btn').style.display = 'block';
+    
+    if (streak >= 2) {
+        levelUp();
+    }
     showQuiz();
 }
 
@@ -209,10 +221,8 @@ function showQuiz() {
 }
 
 function nextStory() {
-    storyIdx++;
-    if (storyIdx >= STORIES[currentLevel].length) {
-        storyIdx = 0; // Loop stories within level
-    }
+    // Go to next story in array, or wrap around
+    storyIdx = (storyIdx + 1) % STORIES[currentLevel].length;
     loadStory();
 }
 
@@ -223,7 +233,7 @@ function levelUp() {
         currentLevel = levels[currentIdx + 1];
         streak = 0;
         storyIdx = 0;
-        alert("🎉 Congratulations! You reached Level " + currentLevel);
+        setTimeout(() => alert("🎉 Level Up! You reached Level " + currentLevel), 500);
     }
 }
 </script>
