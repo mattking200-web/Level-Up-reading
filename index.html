@@ -20,13 +20,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 .word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: 0.2s;}
 .word.correct{color: var(--mint-dark); text-shadow: 1px 1px #dcfce7;}
 .word.wrong{color: var(--error); text-decoration: underline wavy var(--error);}
-
-/* New Transcript Style */
-.transcript-box {
-  margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 12px;
-  border: 1px solid #cbd5e1; font-size: 0.9rem; color: #475569; min-height: 40px;
-}
-
+.transcript-box {margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 0.9rem; color: #475569; min-height: 40px;}
 .btn{font-family:'Fredoka One',cursive; padding:15px 25px; border-radius:15px; border:none; cursor:pointer; font-size:1.1rem; width:100%; transition: 0.2s;}
 .btn-mic{background:var(--sky); color:#fff; margin-bottom:10px;}
 .btn-mic.listening{background:var(--error); animation: pulse 1.5s infinite;}
@@ -49,21 +43,15 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <label><b>Select Level:</b></label>
-            <select id="lvl-select" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; font-size:1rem;"></select>
+            <select id="lvl-select" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
 
         <div id="reading-view" style="display:none;">
             <h2 id="story-title" style="text-align:center; color:var(--sky-dark); margin-bottom:10px;"></h2>
             <div id="story-display" class="story-text"></div>
-            
             <button id="mic-btn" class="btn btn-mic" onclick="toggleMic()">Click to Speak 🎤</button>
-            
-            <div class="transcript-box">
-                <b>What I heard:</b> <span id="live-transcript">...</span>
-            </div>
-
+            <div class="transcript-box"><b>What I heard:</b> <span id="live-transcript">...</span></div>
             <div id="accuracy-display" style="text-align:center; font-weight:900; margin:10px;"></div>
             <button id="next-btn" class="btn btn-next" onclick="nextStory()">Next Story ➡️</button>
         </div>
@@ -72,35 +60,26 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 </div>
 
 <script>
-// (Stories AA, A, B, and C remain exactly as before...)
 const STORIES = {
   AA: [
     { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Hates it","Likes it","Is scared"],a:1}] },
-    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel?",opts:["Loves it","Hates it","Is scared"],a:0}] },
-    { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up"],a:2},{q:"What is the sun like?",opts:["Cold","Wet","Hot"],a:2},{q:"What does the child see?",opts:["The sun","The moon","A star"],a:0}] },
-    { title:"The Ball", text:"I have a ball. The ball is red. I kick the ball.", q:[{q:"What does the child have?",opts:["A bat","A ball","A kite"],a:1},{q:"What color is the ball?",opts:["Green","Blue","Red"],a:2},{q:"What does the child do?",opts:["Throws it","Kicks it","Drops it"],a:1}] },
-    { title:"My Mom", text:"I see my mom. My mom is big. I love my mom.", q:[{q:"Who does the child see?",opts:["Dad","Teacher","Mom"],a:2},{q:"How is the mom described?",opts:["Small","Big","Fast"],a:1},{q:"How does the child feel?",opts:["Loves mom","Fears mom","Misses mom"],a:0}] }
+    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel?",opts:["Loves it","Hates it","Is scared"],a:0}] }
   ],
   A: [
-    { title:"I Can Jump", text:"I can jump. I can run. I can play. It is fun.", q:[{q:"What can the child do?",opts:["Swim","Jump","Fly"],a:1},{q:"How is playing?",opts:["Hard","Boring","Fun"],a:2},{q:"What is another action?",opts:["Sleep","Run","Eat"],a:1}] },
-    { title:"The Big Box", text:"I see a big box. The box is red. I put toys in the box.", q:[{q:"What size is the box?",opts:["Tiny","Big","Short"],a:1},{q:"What color is it?",opts:["Red","Blue","Green"],a:0},{q:"What goes inside?",opts:["Books","Toys","Food"],a:1}] },
-    { title:"My Hat", text:"I have a hat. My hat is blue. I go out to play.", q:[{q:"What does the child have?",opts:["A hat","A coat","A bag"],a:0},{q:"What color is it?",opts:["Red","Green","Blue"],a:2},{q:"Where do they go?",opts:["To bed","To school","Out to play"],a:2}] },
-    { title:"The Hen", text:"I see a hen. The hen is in the pen. The hen has eggs.", q:[{q:"Where is the hen?",opts:["In the barn","In the pen","In the tree"],a:1},{q:"What does the hen have?",opts:["Chicks","Feathers","Eggs"],a:2},{q:"What animal is it?",opts:["A duck","A hen","A pig"],a:1}] },
-    { title:"The Pig", text:"The pig is fat. The pig can dig. The pig is in the mud.", q:[{q:"What does the pig look like?",opts:["Thin","Fat","Small"],a:1},{q:"What can it do?",opts:["Fly","Dig","Sing"],a:1},{q:"Where is the pig?",opts:["In the grass","In the mud","In the water"],a:1}] }
+    { title:"I Can Jump", text:"I can jump. I can run. I can play. It is fun.", q:[{q:"What can the child do?",opts:["Swim","Jump","Fly"],a:1},{q:"How is playing?",opts:["Hard","Boring","Fun"],a:2},{q:"What is another action?",opts:["Sleep","Run","Eat"],a:1}] }
   ],
   B: [
-    { title:"At the Park", text:"I like to go to the park. I can play on the slide. The slide is very fast.", q:[{q:"Where does the child go?",opts:["The store","The park","School"],a:1},{q:"What can they play on?",opts:["The slide","The swings","The bike"],a:0},{q:"How is the slide?",opts:["Slow","Fast","Cold"],a:1}] },
-    { title:"The Little Bird", text:"A little bird is in the tree. It is blue and yellow. The bird can sing a song.", q:[{q:"Where is the bird?",opts:["In the house","In the tree","In the water"],a:1},{q:"What colors is the bird?",opts:["Red and black","Blue and yellow","Green and white"],a:1},{q:"What can the bird do?",opts:["Sing a song","Fly a kite","Dig a hole"],a:0}] },
-    { title:"Fishing", text:"We go to the lake to fish. My dad has a big boat. We catch a little fish.", q:[{q:"Where do they go?",opts:["The ocean","The park","The lake"],a:2},{q:"What size is the boat?",opts:["Small","Big","Red"],a:1},{q:"What do they catch?",opts:["A big fish","A frog","A little fish"],a:2}] },
-    { title:"The Blue Bike", text:"I have a new blue bike. I wear my helmet to be safe. I can ride fast.", q:[{q:"What color is the bike?",opts:["Red","Blue","Green"],a:1},{q:"Why do they wear a helmet?",opts:["To look cool","To be safe","To keep warm"],a:1},{q:"How can they ride?",opts:["Slow","Fast","Side ways"],a:1}] },
-    { title:"My School", text:"I go to school every day. My teacher is very nice. I like to read books.", q:[{q:"How often do they go to school?",opts:["Every day","Sometimes","On Mondays"],a:0},{q:"How is the teacher?",opts:["Mean","Nice","Tall"],a:1},{q:"What do they like to do?",opts:["Play tag","Read books","Paint"],a:1}] }
+    { title:"At the Park", text:"I like to go to the park. I can play on the slide. The slide is very fast.", q:[{q:"Where does the child go?",opts:["The store","The park","School"],a:1},{q:"What can they play on?",opts:["The slide","The swings","The bike"],a:0},{q:"How is the slide?",opts:["Slow","Fast","Cold"],a:1}] }
   ],
   C: [
-    { title:"The Tall Giraffe", text:"The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q:[{q:"What is the giraffe like?",opts:["Short","Tall","Fat"],a:1},{q:"Why is its neck long?",opts:["To see far","To eat leaves","To drink water"],a:1},{q:"Where does it live?",opts:["In a house","In the zoo","On a farm"],a:1}] },
-    { title:"My Garden", text:"I planted seeds in the dirt. I give them water every day. Soon I will see green plants.", q:[{q:"What was planted?",opts:["Flowers","Trees","Seeds"],a:2},{q:"What do the seeds need every day?",opts:["Food","Water","Toys"],a:1},{q:"What color will the plants be?",opts:["Red","Blue","Green"],a:2}] },
-    { title:"A Rainy Day", text:"The rain is falling down fast. I wear my yellow coat and boots. I like to jump in the water.", q:[{q:"What is the weather like?",opts:["Sunny","Snowy","Rainy"],a:2},{q:"What color is the coat?",opts:["Blue","Yellow","Green"],a:1},{q:"What does the child like to do?",opts:["Jump in water","Run fast","Sleep"],a:0}] },
-    { title:"Helping Dad", text:"My dad is making a big cake. I help him stir the eggs. It smells very good in the kitchen.", q:[{q:"What is Dad making?",opts:["Bread","Cookies","A cake"],a:2},{q:"How does the child help?",opts:["Eating","Stirring eggs","Cleaning"],a:1},{q:"Where are they?",opts:["In the garden","In the kitchen","In the car"],a:1}] },
-    { title:"The Night Sky", text:"The moon is bright in the sky. I can see many stars tonight. I go to bed and dream.", q:[{q:"What is bright in the sky?",opts:["The sun","The moon","A plane"],a:1},{q:"What else can they see?",opts:["Stars","Clouds","Birds"],a:0},{q:"What do they do at the end?",opts:["Play","Eat","Go to bed"],a:2}] }
+    { title:"The Tall Giraffe", text:"The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q:[{q:"What is the giraffe like?",opts:["Short","Tall","Fat"],a:1},{q:"Why is its neck long?",opts:["To see far","To eat leaves","To drink water"],a:1},{q:"Where does it live?",opts:["In a house","In the zoo","On a farm"],a:1}] }
+  ],
+  D: [
+    { title:"The Busy Bees", text:"The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q:[{q:"Where do the bees fly?",opts:["To the hive","To the flowers","To the trees"],a:1},{q:"What do they make?",opts:["Milk","Honey","Juice"],a:1},{q:"What should we be?",opts:["Loud","Scared","Careful"],a:2}] },
+    { title:"A Trip to Space", text:"Astronuts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q:[{q:"What do they travel in?",opts:["A plane","A rocket","A car"],a:1},{q:"Where do they go?",opts:["The sun","The moon","Mars"],a:1},{q:"How does Earth look?",opts:["Huge","Small","Purple"],a:1}] },
+    { title:"The Snowman", text:"Winter is here and the ground is white. I used a carrot for the snowman's nose. He has a warm hat.", q:[{q:"What season is it?",opts:["Summer","Winter","Fall"],a:1},{q:"What is the nose made of?",opts:["A button","A carrot","A stick"],a:1},{q:"What is on his head?",opts:["A hat","Snow","A bird"],a:0}] },
+    { title:"The Magic Library", text:"The library has many special books. Some stories are about dragons and kings. I can sit and read for hours.", q:[{q:"What is in the library?",opts:["Toys","Books","Computers"],a:1},{q:"What is one story about?",opts:["Dogs","Dragons","Cars"],a:1},{q:"What does the child do?",opts:["Sit and read","Run","Sleep"],a:0}] },
+    { title:"Baking Cookies", text:"Mom says we can bake chocolate cookies. I help measure the sugar and flour. They taste best when they are warm.", q:[{q:"What kind of cookies?",opts:["Sugar","Chocolate","Oatmeal"],a:1},{q:"What does the child measure?",opts:["Milk","Sugar and flour","Eggs"],a:1},{q:"When do they taste best?",opts:["Cold","When warm","Tomorrow"],a:1}] }
   ]
 };
 
@@ -125,14 +104,15 @@ function loadStory() {
     document.getElementById('lvl-display').textContent = currentLevel;
     document.getElementById('streak-display').textContent = streak;
     document.getElementById('accuracy-display').textContent = "";
-    document.getElementById('live-transcript').textContent = "..."; // Reset transcript
+    document.getElementById('live-transcript').textContent = "...";
     document.getElementById('next-btn').style.display = 'none';
     document.getElementById('quiz-view').style.display = 'none';
     document.getElementById('mic-btn').style.display = 'block';
     
     pointer = 0; correctCount = 0; processedWordCount = 0;
     const display = document.getElementById('story-display');
-    display.innerHTML = story.text.split(' ').map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
+    // Using regex /\s+/ handles all types of spaces/tabs/newlines
+    display.innerHTML = story.text.trim().split(/\s+/).map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
 }
 
 function toggleMic() {
@@ -146,10 +126,7 @@ function toggleMic() {
             for (let i = 0; i < event.results.length; i++) {
                 fullTranscript += event.results[i][0].transcript.toLowerCase() + " ";
             }
-            
-            // Display the transcript so you can see what it thinks you said
             document.getElementById('live-transcript').textContent = fullTranscript;
-
             const spokenArray = fullTranscript.trim().replace(/[.,!?;]/g, '').split(/\s+/);
             
             while (processedWordCount < spokenArray.length) {
@@ -172,7 +149,8 @@ function toggleMic() {
 }
 
 function processSingleWord(spoken) {
-    const storyWords = STORIES[currentLevel][storyIdx].text.toLowerCase().replace(/[.,!?;]/g, '').split(' ');
+    // Aggressive cleaning of story text for comparison
+    const storyWords = STORIES[currentLevel][storyIdx].text.toLowerCase().replace(/[.,!?;]/g, '').trim().split(/\s+/);
     if (pointer >= storyWords.length) return;
 
     if (spoken === storyWords[pointer]) {
@@ -192,7 +170,7 @@ function markWord(idx, status) {
 
 function finishReading() {
     const story = STORIES[currentLevel][storyIdx];
-    const words = story.text.split(' ');
+    const words = story.text.trim().split(/\s+/);
     for (let i = pointer; i < words.length; i++) markWord(i, 'wrong');
     const accuracy = Math.round((correctCount / words.length) * 100);
     const display = document.getElementById('accuracy-display');
@@ -204,7 +182,6 @@ function finishReading() {
     document.getElementById('streak-display').textContent = streak;
     document.getElementById('mic-btn').style.display = 'none';
     document.getElementById('next-btn').style.display = 'block';
-    
     if (streak >= 2) levelUp();
     showQuiz();
 }
