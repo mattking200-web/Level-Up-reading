@@ -9,6 +9,7 @@
 :root {
   --mint:#4ade80; --mint-dark:#16a34a; --sky:#38bdf8; --sky-dark:#0284c7;
   --bg:#f0fdf4; --text:#1e293b; --muted:#64748b; --border:#e2e8f0;
+  --error: #ef4444;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); padding:16px;}
@@ -18,10 +19,13 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 .stats{display:flex; justify-content:space-between; margin-bottom:20px; font-weight:800; background:#f8fafc; padding:10px; border-radius:12px;}
 .story-text{font-size:1.8rem; line-height:1.8; font-weight:700; margin-bottom:20px; text-align:center;}
 .word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: color 0.3s;}
-.word.correct{color: #16a34a; text-shadow: 1px 1px #dcfce7;}
+/* Correct is Green */
+.word.correct{color: var(--mint-dark); text-shadow: 1px 1px #dcfce7;}
+/* Wrong is Red */
+.word.wrong{color: var(--error); text-decoration: underline wavy var(--error); opacity: 0.8;}
 .btn{font-family:'Fredoka One',cursive; padding:15px 25px; border-radius:15px; border:none; cursor:pointer; font-size:1.1rem; width:100%; transition: 0.2s;}
 .btn-mic{background:var(--sky); color:#fff; margin-bottom:10px;}
-.btn-mic.listening{background:#ef4444; animation: pulse 1.5s infinite;}
+.btn-mic.listening{background:var(--error); animation: pulse 1.5s infinite;}
 .btn-next{background:var(--mint); color:#fff; display:none;}
 @keyframes pulse{ 0%{opacity:1;} 50%{opacity:0.7;} 100%{opacity:1;} }
 .quiz-section{margin-top:20px; border-top:2px dashed #e2e8f0; padding-top:20px;}
@@ -83,8 +87,9 @@ let storyIdx = 0;
 let streak = 0;
 let recognition;
 let isListening = false;
-let currentWordPointer = 0; 
-let wordsMarkedCorrect = 0;
+let pointer = 0; 
+let lastTranscript = "";
+let correctWordsCount = 0;
 
 const select = document.getElementById('lvl-select');
 Object.keys(STORIES).forEach(lvl => {
@@ -112,8 +117,9 @@ function loadStory() {
     document.getElementById('quiz-view').style.display = 'none';
     document.getElementById('mic-btn').style.display = 'block';
     
-    currentWordPointer = 0;
-    wordsMarkedCorrect = 0;
+    pointer = 0;
+    correctWordsCount = 0;
+    lastTranscript = "";
     const display = document.getElementById('story-display');
     display.innerHTML = story.text.split(' ').map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
 }
@@ -127,11 +133,16 @@ function toggleMic() {
         recognition.lang = 'en-US';
 
         recognition.onresult = (event) => {
-            let transcript = "";
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript.toLowerCase();
+            let currentFullTranscript = "";
+            for (let i = 0; i < event.results.length; i++) {
+                currentFullTranscript += event.results[i][0].transcript.toLowerCase() + " ";
             }
-            checkSmartSequence(transcript);
+            
+            let newWords = currentFullTranscript.replace(lastTranscript, "").trim();
+            if (newWords.length > 0) {
+                processNewWords(newWords);
+                lastTranscript = currentFullTranscript;
+            }
         };
     }
 
@@ -149,24 +160,26 @@ function toggleMic() {
     }
 }
 
-function checkSmartSequence(transcript) {
+function processNewWords(text) {
     const story = STORIES[currentLevel][storyIdx];
     const storyWords = story.text.toLowerCase().replace(/[.,!?;]/g, '').split(' ');
-    const spokenArray = transcript.replace(/[.,!?;]/g, '').split(/\s+/);
+    const spokenWords = text.replace(/[.,!?;]/g, '').split(/\s+/).filter(w => w.length > 0);
 
-    spokenArray.forEach(spokenWord => {
-        // Look ahead up to 3 words to allow for missed "small" words
-        for (let lookAhead = 0; lookAhead < 3; lookAhead++) {
-            let checkIdx = currentWordPointer + lookAhead;
-            if (checkIdx < storyWords.length && spokenWord === storyWords[checkIdx]) {
-                const el = document.getElementById(`word-${checkIdx}`);
-                if (!el.classList.contains('correct')) {
-                    el.classList.add('correct');
-                    wordsMarkedCorrect++;
-                }
-                currentWordPointer = checkIdx + 1; // Sync pointer to the new position
-                break;
-            }
+    spokenWords.forEach(spoken => {
+        // 1. Check if they said the CURRENT word correctly
+        if (pointer < storyWords.length && spoken === storyWords[pointer]) {
+            document.getElementById(`word-${pointer}`).classList.add('correct');
+            correctWordsCount++;
+            pointer++;
+        } 
+        // 2. If they said the NEXT word instead (they skipped or missed the current one)
+        else if (pointer + 1 < storyWords.length && spoken === storyWords[pointer + 1]) {
+            // Mark the skipped word as WRONG (Red)
+            document.getElementById(`word-${pointer}`).classList.add('wrong');
+            // Mark the word they just said as CORRECT (Green)
+            document.getElementById(`word-${pointer + 1}`).classList.add('correct');
+            correctWordsCount++;
+            pointer += 2; // Move past both words
         }
     });
 }
@@ -174,26 +187,30 @@ function checkSmartSequence(transcript) {
 function finishReading() {
     const story = STORIES[currentLevel][storyIdx];
     const totalWords = story.text.split(' ').length;
-    const accuracy = Math.round((wordsMarkedCorrect / totalWords) * 100);
     
+    // Any words left over at the end are marked as wrong
+    for(let i = pointer; i < totalWords; i++) {
+        const el = document.getElementById(`word-${i}`);
+        if (!el.classList.contains('correct')) el.classList.add('wrong');
+    }
+
+    const accuracy = Math.round((correctWordsCount / totalWords) * 100);
     const display = document.getElementById('accuracy-display');
     display.textContent = `Accuracy: ${accuracy}%`;
 
     if (accuracy >= 80) {
         streak++;
-        display.innerHTML += "<br>🌟 Great Reading!";
+        display.innerHTML += "<br>🌟 Nice Reading!";
     } else {
         streak = 0;
-        display.innerHTML += "<br>📚 Try to read every word!";
+        display.innerHTML += "<br>📚 Try reading again for a higher score!";
     }
     
     document.getElementById('streak-display').textContent = streak;
     document.getElementById('mic-btn').style.display = 'none';
     document.getElementById('next-btn').style.display = 'block';
     
-    if (streak >= 2) {
-        levelUp();
-    }
+    if (streak >= 2) levelUp();
     showQuiz();
 }
 
@@ -238,7 +255,7 @@ function levelUp() {
         currentLevel = levels[currentIdx + 1];
         streak = 0;
         storyIdx = 0;
-        setTimeout(() => alert("🎉 LEVEL UP! Moving to Level " + currentLevel), 500);
+        setTimeout(() => alert("🎉 AMAZING! You reached Level " + currentLevel), 500);
     }
 }
 </script>
