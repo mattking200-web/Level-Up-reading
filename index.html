@@ -26,6 +26,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 .btn-mic.listening{background:var(--error); animation: pulse 1.5s infinite;}
 .btn-next{background:var(--mint); color:#fff; display:none;}
 @keyframes pulse{ 0%{opacity:1;} 50%{opacity:0.7;} 100%{opacity:1;} }
+.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #e2e8f0; border-radius:12px; background:#fff; font-weight:700; cursor:pointer; text-align:left;}
 </style>
 </head>
 <body>
@@ -39,7 +40,8 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <select id="lvl-select" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px; font-size: 1rem;"></select>
+            <label><b>Choose Your Level:</b></label>
+            <select id="lvl-select" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; font-size:1rem;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
 
@@ -51,19 +53,32 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
             <div id="accuracy-display" style="text-align:center; font-weight:900; margin:10px;"></div>
             <button id="next-btn" class="btn btn-next" onclick="nextStory()">Next Story ➡️</button>
         </div>
-        <div id="quiz-view" style="display:none; margin-top:20px; border-top:2px dashed #eee; padding-top:20px;"></div>
+        <div id="quiz-view" style="display:none; margin-top:20px; border-top:2px dashed #e2e8f0; padding-top:20px;"></div>
     </div>
 </div>
 
 <script>
-// (Using the same stories you have in Level D...)
 const STORIES = {
+  AA: [
+    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2}] },
+    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1}] }
+  ],
+  A: [
+    { title:"I Can Jump", text:"I can jump. I can run. I can play. It is fun.", q:[{q:"What can the child do?",opts:["Swim","Jump","Fly"],a:1},{q:"How is playing?",opts:["Hard","Boring","Fun"],a:2}] }
+  ],
+  B: [
+    { title:"At the Park", text:"I like to go to the park. I can play on the slide. The slide is very fast.", q:[{q:"Where does the child go?",opts:["The store","The park","School"],a:1}] }
+  ],
+  C: [
+    { title:"The Tall Giraffe", text:"The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q:[{q:"What is the giraffe like?",opts:["Short","Tall","Fat"],a:1}] }
+  ],
   D: [
-    { title:"The Busy Bees", text:"The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q:[{q:"Where do the bees fly?",opts:["To the hive","To the flowers","To the trees"],a:1},{q:"What do they make?",opts:["Milk","Honey","Juice"],a:1},{q:"What should we be?",opts:["Loud","Scared","Careful"],a:2}] }
+    { title:"The Busy Bees", text:"The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q:[{q:"Where do the bees fly?",opts:["To the hive","To the flowers","To the trees"],a:1},{q:"What do they make?",opts:["Milk","Honey","Juice"],a:1}] },
+    { title:"A Trip to Space", text:"Astronauts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q:[{q:"What do they travel in?",opts:["A plane","A rocket","A car"],a:1}] }
   ]
 };
 
-let currentLevel = "D", storyIdx = 0, streak = 0, recognition, isListening = false;
+let currentLevel = "AA", storyIdx = 0, streak = 0, recognition, isListening = false;
 let pointer = 0, correctCount = 0, processedWordCount = 0;
 
 const select = document.getElementById('lvl-select');
@@ -107,11 +122,10 @@ function toggleMic() {
                 fullTranscript += event.results[i][0].transcript.toLowerCase() + " ";
             }
             document.getElementById('live-transcript').textContent = fullTranscript;
-            
-            // We split the whole transcript and process new words
             const spokenArray = fullTranscript.trim().split(/\s+/).map(w => cleanWord(w));
+            
             while (processedWordCount < spokenArray.length) {
-                syncAndProcess(spokenArray[processedWordCount]);
+                deepSearchProcess(spokenArray[processedWordCount]);
                 processedWordCount++;
             }
         };
@@ -130,39 +144,41 @@ function toggleMic() {
 }
 
 function cleanWord(w) {
-    return w.replace(/[.,!?;]/g, '').toLowerCase().trim();
+    // Aggressively remove punctuation and special spacing characters
+    return w.replace(/[^\w\s]|_/g, "").toLowerCase().trim();
 }
 
-// Check for exact match OR plural forgiveness OR homophones
 function isMatch(spoken, storyWord) {
     if (!spoken || !storyWord) return false;
-    const homophones = { "to": ["too", "two"], "for": ["four", "fore"], "see": ["sea"], "bee": ["be", "bees"], "bees": ["bee", "be"] };
-    
     if (spoken === storyWord) return true;
     if (spoken + 's' === storyWord || storyWord + 's' === spoken) return true;
-    if (homophones[storyWord] && homophones[storyWord].includes(spoken)) return true;
-    return false;
+    
+    // Fuzzy matching for 80% similarity
+    let matches = 0;
+    for (let i = 0; i < Math.min(spoken.length, storyWord.length); i++) {
+        if (spoken[i] === storyWord[i]) matches++;
+    }
+    return (matches / storyWord.length) >= 0.8;
 }
 
-function syncAndProcess(spoken) {
+function deepSearchProcess(spoken) {
     const storyWords = STORIES[currentLevel][storyIdx].text.split(/\s+/).map(w => cleanWord(w));
-    if (pointer >= storyWords.length) return;
-
-    // Look ahead 5 words to see if we can find where the user is
+    
+    // Look ahead through the ENTIRE rest of the story to find the word
     let foundAt = -1;
-    for (let i = 0; i < 5; i++) {
-        if (pointer + i < storyWords.length && isMatch(spoken, storyWords[pointer + i])) {
-            foundAt = pointer + i;
+    for (let i = pointer; i < storyWords.length; i++) {
+        if (isMatch(spoken, storyWords[i])) {
+            foundAt = i;
             break;
         }
     }
 
     if (foundAt !== -1) {
-        // If we found the word ahead of the current pointer, 
-        // mark the ones we skipped as "wrong"
+        // Mark everything between current pointer and the found word as "wrong"
         for (let j = pointer; j < foundAt; j++) {
             markWord(j, 'wrong');
         }
+        // Mark the found word as "correct"
         markWord(foundAt, 'correct');
         pointer = foundAt + 1;
         correctCount++;
@@ -171,23 +187,24 @@ function syncAndProcess(spoken) {
 
 function markWord(idx, status) {
     const el = document.getElementById(`word-${idx}`);
-    if (el && !el.classList.contains('correct') && !el.classList.contains('wrong')) {
-        el.classList.add(status);
+    if (el && !el.classList.contains('correct')) {
+        // Once a word is correct, we don't overwrite it with wrong
+        if (status === 'wrong' && el.classList.contains('wrong')) return;
+        el.className = `word ${status}`;
     }
 }
 
 function finishReading() {
-    const story = STORIES[currentLevel][storyIdx];
-    const words = story.text.trim().split(/\s+/);
-    // Mark remaining unread words as wrong
-    for (let i = pointer; i < words.length; i++) markWord(i, 'wrong');
+    const words = STORIES[currentLevel][storyIdx].text.trim().split(/\s+/);
+    for (let i = 0; i < words.length; i++) {
+        const el = document.getElementById(`word-${i}`);
+        if (!el.classList.contains('correct')) el.classList.add('wrong');
+    }
     
     const accuracy = Math.round((correctCount / words.length) * 100);
     const display = document.getElementById('accuracy-display');
     display.textContent = `Accuracy: ${accuracy}%`;
-
     if (accuracy >= 80) streak++; else streak = 0;
-    
     document.getElementById('streak-display').textContent = streak;
     document.getElementById('mic-btn').style.display = 'none';
     document.getElementById('next-btn').style.display = 'block';
@@ -196,20 +213,15 @@ function finishReading() {
 
 function showQuiz() {
     const quizView = document.getElementById('quiz-view');
-    quizView.innerHTML = "<h3>Story Check-In</h3>";
+    quizView.innerHTML = "<h3>Great Work!</h3>";
     quizView.style.display = 'block';
     const story = STORIES[currentLevel][storyIdx];
     story.q.forEach((qObj, qi) => {
         const div = document.createElement('div');
         div.innerHTML = `<p><b>${qObj.q}</b></p>`;
         qObj.opts.forEach((opt, oi) => {
-            const b = document.createElement('button');
-            b.style.display="block"; b.style.width="100%"; b.style.padding="10px"; b.style.margin="5px 0";
-            b.textContent = opt;
-            b.onclick = () => {
-                if (oi === qObj.a) b.style.background = "#dcfce7";
-                else b.style.background = "#fee2e2";
-            };
+            const b = document.createElement('button'); b.className="opt-btn"; b.textContent = opt;
+            b.onclick = () => { b.style.background = (oi === qObj.a) ? "#dcfce7" : "#fee2e2"; };
             div.appendChild(b);
         });
         quizView.appendChild(div);
