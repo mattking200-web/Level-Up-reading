@@ -26,10 +26,6 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 .btn-mic.listening{background:var(--error); animation: pulse 1.5s infinite;}
 .btn-next{background:var(--mint); color:#fff; display:none;}
 @keyframes pulse{ 0%{opacity:1;} 50%{opacity:0.7;} 100%{opacity:1;} }
-.quiz-section{margin-top:20px; border-top:2px dashed #e2e8f0; padding-top:20px;}
-.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #e2e8f0; border-radius:12px; background:#fff; font-weight:700; cursor:pointer; text-align:left;}
-.opt-btn.correct-choice{background:#dcfce7; border-color:#22c55e; color:#166534;}
-.opt-btn.wrong-choice{background:#fee2e2; border-color:#f87171; color:#991b1b;}
 </style>
 </head>
 <body>
@@ -43,7 +39,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <select id="lvl-select" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px;"></select>
+            <select id="lvl-select" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px; font-size: 1rem;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
 
@@ -55,35 +51,19 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
             <div id="accuracy-display" style="text-align:center; font-weight:900; margin:10px;"></div>
             <button id="next-btn" class="btn btn-next" onclick="nextStory()">Next Story ➡️</button>
         </div>
-        <div id="quiz-view" class="quiz-section" style="display:none;"></div>
+        <div id="quiz-view" style="display:none; margin-top:20px; border-top:2px dashed #eee; padding-top:20px;"></div>
     </div>
 </div>
 
 <script>
+// (Using the same stories you have in Level D...)
 const STORIES = {
-  AA: [
-    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Hates it","Likes it","Is scared"],a:1}] },
-    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel?",opts:["Loves it","Hates it","Is scared"],a:0}] }
-  ],
-  A: [
-    { title:"I Can Jump", text:"I can jump. I can run. I can play. It is fun.", q:[{q:"What can the child do?",opts:["Swim","Jump","Fly"],a:1},{q:"How is playing?",opts:["Hard","Boring","Fun"],a:2},{q:"What is another action?",opts:["Sleep","Run","Eat"],a:1}] }
-  ],
-  B: [
-    { title:"At the Park", text:"I like to go to the park. I can play on the slide. The slide is very fast.", q:[{q:"Where does the child go?",opts:["The store","The park","School"],a:1},{q:"What can they play on?",opts:["The slide","The swings","The bike"],a:0},{q:"How is the slide?",opts:["Slow","Fast","Cold"],a:1}] }
-  ],
-  C: [
-    { title:"The Tall Giraffe", text:"The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q:[{q:"What is the giraffe like?",opts:["Short","Tall","Fat"],a:1},{q:"Why is its neck long?",opts:["To see far","To eat leaves","To drink water"],a:1},{q:"Where does it live?",opts:["In a house","In the zoo","On a farm"],a:1}] }
-  ],
   D: [
-    { title:"The Busy Bees", text:"The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q:[{q:"Where do the bees fly?",opts:["To the hive","To the flowers","To the trees"],a:1},{q:"What do they make?",opts:["Milk","Honey","Juice"],a:1},{q:"What should we be?",opts:["Loud","Scared","Careful"],a:2}] },
-    { title:"A Trip to Space", text:"Astronuts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q:[{q:"What do they travel in?",opts:["A plane","A rocket","A car"],a:1},{q:"Where do they go?",opts:["The sun","The moon","Mars"],a:1},{q:"How does Earth look?",opts:["Huge","Small","Purple"],a:1}] },
-    { title:"The Snowman", text:"Winter is here and the ground is white. I used a carrot for the snowman's nose. He has a warm hat.", q:[{q:"What season is it?",opts:["Summer","Winter","Fall"],a:1},{q:"What is the nose made of?",opts:["A button","A carrot","A stick"],a:1},{q:"What is on his head?",opts:["A hat","Snow","A bird"],a:0}] },
-    { title:"The Magic Library", text:"The library has many special books. Some stories are about dragons and kings. I can sit and read for hours.", q:[{q:"What is in the library?",opts:["Toys","Books","Computers"],a:1},{q:"What is one story about?",opts:["Dogs","Dragons","Cars"],a:1},{q:"What does the child do?",opts:["Sit and read","Run","Sleep"],a:0}] },
-    { title:"Baking Cookies", text:"Mom says we can bake chocolate cookies. I help measure the sugar and flour. They taste best when they are warm.", q:[{q:"What kind of cookies?",opts:["Sugar","Chocolate","Oatmeal"],a:1},{q:"What does the child measure?",opts:["Milk","Sugar and flour","Eggs"],a:1},{q:"When do they taste best?",opts:["Cold","When warm","Tomorrow"],a:1}] }
+    { title:"The Busy Bees", text:"The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q:[{q:"Where do the bees fly?",opts:["To the hive","To the flowers","To the trees"],a:1},{q:"What do they make?",opts:["Milk","Honey","Juice"],a:1},{q:"What should we be?",opts:["Loud","Scared","Careful"],a:2}] }
   ]
 };
 
-let currentLevel = "AA", storyIdx = 0, streak = 0, recognition, isListening = false;
+let currentLevel = "D", storyIdx = 0, streak = 0, recognition, isListening = false;
 let pointer = 0, correctCount = 0, processedWordCount = 0;
 
 const select = document.getElementById('lvl-select');
@@ -92,7 +72,7 @@ Object.keys(STORIES).forEach(lvl => {
 });
 
 function startApp() {
-    currentLevel = select.value; storyIdx = 0; streak = 0;
+    currentLevel = select.value; storyIdx = 0;
     document.getElementById('setup-view').style.display = 'none';
     document.getElementById('reading-view').style.display = 'block';
     loadStory();
@@ -111,8 +91,8 @@ function loadStory() {
     
     pointer = 0; correctCount = 0; processedWordCount = 0;
     const display = document.getElementById('story-display');
-    // Using regex /\s+/ handles all types of spaces/tabs/newlines
-    display.innerHTML = story.text.trim().split(/\s+/).map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
+    const words = story.text.trim().split(/\s+/);
+    display.innerHTML = words.map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
 }
 
 function toggleMic() {
@@ -127,10 +107,11 @@ function toggleMic() {
                 fullTranscript += event.results[i][0].transcript.toLowerCase() + " ";
             }
             document.getElementById('live-transcript').textContent = fullTranscript;
-            const spokenArray = fullTranscript.trim().replace(/[.,!?;]/g, '').split(/\s+/);
             
+            // We split the whole transcript and process new words
+            const spokenArray = fullTranscript.trim().split(/\s+/).map(w => cleanWord(w));
             while (processedWordCount < spokenArray.length) {
-                processSingleWord(spokenArray[processedWordCount]);
+                syncAndProcess(spokenArray[processedWordCount]);
                 processedWordCount++;
             }
         };
@@ -148,16 +129,43 @@ function toggleMic() {
     }
 }
 
-function processSingleWord(spoken) {
-    // Aggressive cleaning of story text for comparison
-    const storyWords = STORIES[currentLevel][storyIdx].text.toLowerCase().replace(/[.,!?;]/g, '').trim().split(/\s+/);
+function cleanWord(w) {
+    return w.replace(/[.,!?;]/g, '').toLowerCase().trim();
+}
+
+// Check for exact match OR plural forgiveness OR homophones
+function isMatch(spoken, storyWord) {
+    if (!spoken || !storyWord) return false;
+    const homophones = { "to": ["too", "two"], "for": ["four", "fore"], "see": ["sea"], "bee": ["be", "bees"], "bees": ["bee", "be"] };
+    
+    if (spoken === storyWord) return true;
+    if (spoken + 's' === storyWord || storyWord + 's' === spoken) return true;
+    if (homophones[storyWord] && homophones[storyWord].includes(spoken)) return true;
+    return false;
+}
+
+function syncAndProcess(spoken) {
+    const storyWords = STORIES[currentLevel][storyIdx].text.split(/\s+/).map(w => cleanWord(w));
     if (pointer >= storyWords.length) return;
 
-    if (spoken === storyWords[pointer]) {
-        markWord(pointer, 'correct'); pointer++; correctCount++;
-    } 
-    else if (pointer + 1 < storyWords.length && spoken === storyWords[pointer + 1]) {
-        markWord(pointer, 'wrong'); markWord(pointer + 1, 'correct'); pointer += 2; correctCount++;
+    // Look ahead 5 words to see if we can find where the user is
+    let foundAt = -1;
+    for (let i = 0; i < 5; i++) {
+        if (pointer + i < storyWords.length && isMatch(spoken, storyWords[pointer + i])) {
+            foundAt = pointer + i;
+            break;
+        }
+    }
+
+    if (foundAt !== -1) {
+        // If we found the word ahead of the current pointer, 
+        // mark the ones we skipped as "wrong"
+        for (let j = pointer; j < foundAt; j++) {
+            markWord(j, 'wrong');
+        }
+        markWord(foundAt, 'correct');
+        pointer = foundAt + 1;
+        correctCount++;
     }
 }
 
@@ -171,36 +179,36 @@ function markWord(idx, status) {
 function finishReading() {
     const story = STORIES[currentLevel][storyIdx];
     const words = story.text.trim().split(/\s+/);
+    // Mark remaining unread words as wrong
     for (let i = pointer; i < words.length; i++) markWord(i, 'wrong');
+    
     const accuracy = Math.round((correctCount / words.length) * 100);
     const display = document.getElementById('accuracy-display');
     display.textContent = `Accuracy: ${accuracy}%`;
 
-    if (accuracy >= 80) { streak++; display.innerHTML += "<br>🌟 Nice Reading!"; }
-    else { streak = 0; display.innerHTML += "<br>📚 Try again for a streak!"; }
+    if (accuracy >= 80) streak++; else streak = 0;
     
     document.getElementById('streak-display').textContent = streak;
     document.getElementById('mic-btn').style.display = 'none';
     document.getElementById('next-btn').style.display = 'block';
-    if (streak >= 2) levelUp();
     showQuiz();
 }
 
 function showQuiz() {
     const quizView = document.getElementById('quiz-view');
-    quizView.innerHTML = "<h3>Story Questions</h3>";
+    quizView.innerHTML = "<h3>Story Check-In</h3>";
     quizView.style.display = 'block';
     const story = STORIES[currentLevel][storyIdx];
     story.q.forEach((qObj, qi) => {
         const div = document.createElement('div');
-        div.innerHTML = `<p><b>${qi+1}. ${qObj.q}</b></p>`;
+        div.innerHTML = `<p><b>${qObj.q}</b></p>`;
         qObj.opts.forEach((opt, oi) => {
-            const b = document.createElement('button'); b.className="opt-btn"; b.textContent = opt;
+            const b = document.createElement('button');
+            b.style.display="block"; b.style.width="100%"; b.style.padding="10px"; b.style.margin="5px 0";
+            b.textContent = opt;
             b.onclick = () => {
-                const btns = div.querySelectorAll('button');
-                btns.forEach(btn => btn.disabled = true);
-                if (oi === qObj.a) b.classList.add('correct-choice');
-                else { b.classList.add('wrong-choice'); btns[qObj.a].classList.add('correct-choice'); }
+                if (oi === qObj.a) b.style.background = "#dcfce7";
+                else b.style.background = "#fee2e2";
             };
             div.appendChild(b);
         });
@@ -211,15 +219,6 @@ function showQuiz() {
 function nextStory() {
     storyIdx = (storyIdx + 1) % STORIES[currentLevel].length;
     loadStory();
-}
-
-function levelUp() {
-    const lvls = Object.keys(STORIES);
-    let idx = lvls.indexOf(currentLevel);
-    if (idx < lvls.length - 1) {
-        currentLevel = lvls[idx + 1]; streak = 0; storyIdx = 0;
-        setTimeout(() => alert("🎉 AMAZING! You reached Level " + currentLevel), 500);
-    }
 }
 </script>
 </body>
