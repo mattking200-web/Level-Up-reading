@@ -42,7 +42,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <label><b>Choose Your Level:</b></label>
+            <label><b>Choose Level:</b></label>
             <select id="lvl-select" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; font-size:1rem;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
@@ -63,8 +63,8 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 <script>
 const STORIES = {
   AA: [
-    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Loves it","Fears it","Ignores it"],a:0}] },
-    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel?",opts:["Loves dog","Scared","Sad"],a:0}] },
+    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Loves it","Fears it","Likes it"],a:2}] },
+    { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel about the dog?",opts:["Loves it","Hates it","Is scared"],a:0}] },
     { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up"],a:2},{q:"What is the sun like?",opts:["Cold","Wet","Hot"],a:2},{q:"What does the child see?",opts:["The sun","The moon","A star"],a:0}] },
     { title:"The Ball", text:"I have a ball. The ball is red. I kick the ball.", q:[{q:"What does the child have?",opts:["A bat","A ball","A kite"],a:1},{q:"What color is the ball?",opts:["Green","Blue","Red"],a:2},{q:"What does the child do?",opts:["Throws it","Kicks it","Drops it"],a:1}] },
     { title:"My Mom", text:"I see my mom. My mom is big. I love my mom.", q:[{q:"Who does the child see?",opts:["Dad","Teacher","Mom"],a:2},{q:"How is the mom described?",opts:["Small","Big","Fast"],a:1},{q:"How does the child feel?",opts:["Loves mom","Fears mom","Misses mom"],a:0}] }
@@ -83,7 +83,8 @@ let storyIdx = 0;
 let streak = 0;
 let recognition;
 let isListening = false;
-let currentWordPointer = 0; // TRACKS WHICH WORD THE USER SHOULD BE ON
+let currentWordPointer = 0; 
+let wordsMarkedCorrect = 0;
 
 const select = document.getElementById('lvl-select');
 Object.keys(STORIES).forEach(lvl => {
@@ -112,6 +113,7 @@ function loadStory() {
     document.getElementById('mic-btn').style.display = 'block';
     
     currentWordPointer = 0;
+    wordsMarkedCorrect = 0;
     const display = document.getElementById('story-display');
     display.innerHTML = story.text.split(' ').map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
 }
@@ -129,7 +131,7 @@ function toggleMic() {
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript.toLowerCase();
             }
-            checkSequentialText(transcript);
+            checkSmartSequence(transcript);
         };
     }
 
@@ -147,20 +149,23 @@ function toggleMic() {
     }
 }
 
-function checkSequentialText(transcript) {
+function checkSmartSequence(transcript) {
     const story = STORIES[currentLevel][storyIdx];
     const storyWords = story.text.toLowerCase().replace(/[.,!?;]/g, '').split(' ');
     const spokenArray = transcript.replace(/[.,!?;]/g, '').split(/\s+/);
 
-    // Look through what the user just said
     spokenArray.forEach(spokenWord => {
-        if (currentWordPointer < storyWords.length) {
-            const targetWord = storyWords[currentWordPointer];
-            
-            // STRICT MATCH: Only advances if the spoken word matches the NEXT word in the story
-            if (spokenWord === targetWord) {
-                document.getElementById(`word-${currentWordPointer}`).classList.add('correct');
-                currentWordPointer++;
+        // Look ahead up to 3 words to allow for missed "small" words
+        for (let lookAhead = 0; lookAhead < 3; lookAhead++) {
+            let checkIdx = currentWordPointer + lookAhead;
+            if (checkIdx < storyWords.length && spokenWord === storyWords[checkIdx]) {
+                const el = document.getElementById(`word-${checkIdx}`);
+                if (!el.classList.contains('correct')) {
+                    el.classList.add('correct');
+                    wordsMarkedCorrect++;
+                }
+                currentWordPointer = checkIdx + 1; // Sync pointer to the new position
+                break;
             }
         }
     });
@@ -169,7 +174,7 @@ function checkSequentialText(transcript) {
 function finishReading() {
     const story = STORIES[currentLevel][storyIdx];
     const totalWords = story.text.split(' ').length;
-    const accuracy = Math.round((currentWordPointer / totalWords) * 100);
+    const accuracy = Math.round((wordsMarkedCorrect / totalWords) * 100);
     
     const display = document.getElementById('accuracy-display');
     display.textContent = `Accuracy: ${accuracy}%`;
@@ -179,7 +184,7 @@ function finishReading() {
         display.innerHTML += "<br>🌟 Great Reading!";
     } else {
         streak = 0;
-        display.innerHTML += "<br>📚 Try to read every word in order!";
+        display.innerHTML += "<br>📚 Try to read every word!";
     }
     
     document.getElementById('streak-display').textContent = streak;
@@ -206,13 +211,14 @@ function showQuiz() {
             btn.className = "opt-btn";
             btn.textContent = opt;
             btn.onclick = () => {
+                const siblings = qDiv.querySelectorAll('button');
+                siblings.forEach(b => b.disabled = true);
                 if (oIdx === qObj.a) {
                     btn.classList.add('correct-choice');
                 } else {
                     btn.classList.add('wrong-choice');
+                    siblings[qObj.a].classList.add('correct-choice');
                 }
-                const siblings = qDiv.querySelectorAll('button');
-                siblings.forEach(b => b.disabled = true);
             };
             qDiv.appendChild(btn);
         });
@@ -221,7 +227,6 @@ function showQuiz() {
 }
 
 function nextStory() {
-    // Go to next story in array, or wrap around
     storyIdx = (storyIdx + 1) % STORIES[currentLevel].length;
     loadStory();
 }
@@ -233,7 +238,7 @@ function levelUp() {
         currentLevel = levels[currentIdx + 1];
         streak = 0;
         storyIdx = 0;
-        setTimeout(() => alert("🎉 Level Up! You reached Level " + currentLevel), 500);
+        setTimeout(() => alert("🎉 LEVEL UP! Moving to Level " + currentLevel), 500);
     }
 }
 </script>
