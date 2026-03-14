@@ -26,7 +26,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 .btn-next{background:var(--mint); color:#fff; display:none;}
 @keyframes pulse{ 0%{opacity:1;} 50%{opacity:0.7;} 100%{opacity:1;} }
 .quiz-section{margin-top:20px; border-top:2px dashed #e2e8f0; padding-top:20px;}
-.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #e2e8f0; border-radius:12px; background:#fff; font-weight:700; cursor:pointer;}
+.opt-btn{display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #e2e8f0; border-radius:12px; background:#fff; font-weight:700; cursor:pointer; text-align:left;}
 .opt-btn.correct-choice{background:#dcfce7; border-color:#22c55e; color:#166534;}
 .opt-btn.wrong-choice{background:#fee2e2; border-color:#f87171; color:#991b1b;}
 </style>
@@ -42,7 +42,8 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <select id="lvl-select" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px;"></select>
+            <label><b>Select Your Level:</b></label>
+            <select id="lvl-select" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; font-size:1rem;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
 
@@ -60,7 +61,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
 <script>
 const STORIES = {
   AA: [
-    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Loves it","Fears it","Likes it"],a:2}] },
+    { title:"The Cat", text:"I see a cat. The cat is big. I like the cat.", q:[{q:"What does the child see?",opts:["A dog","A cat","A bird"],a:1},{q:"What size is the cat?",opts:["Small","Tiny","Big"],a:2},{q:"How does the child feel?",opts:["Hates it","Likes it","Is scared"],a:1}] },
     { title:"My Dog", text:"My dog is red. My dog can run. I love my dog.", q:[{q:"What color is the dog?",opts:["Blue","Red","Green"],a:1},{q:"What can the dog do?",opts:["Fly","Run","Sing"],a:1},{q:"How does the child feel?",opts:["Loves it","Hates it","Is scared"],a:0}] },
     { title:"The Sun", text:"The sun is up. I see the sun. It is hot.", q:[{q:"Where is the sun?",opts:["Down","Hidden","Up"],a:2},{q:"What is the sun like?",opts:["Cold","Wet","Hot"],a:2},{q:"What does the child see?",opts:["The sun","The moon","A star"],a:0}] },
     { title:"The Ball", text:"I have a ball. The ball is red. I kick the ball.", q:[{q:"What does the child have?",opts:["A bat","A ball","A kite"],a:1},{q:"What color is the ball?",opts:["Green","Blue","Red"],a:2},{q:"What does the child do?",opts:["Throws it","Kicks it","Drops it"],a:1}] },
@@ -72,6 +73,13 @@ const STORIES = {
     { title:"My Hat", text:"I have a hat. My hat is blue. I go out to play.", q:[{q:"What does the child have?",opts:["A hat","A coat","A bag"],a:0},{q:"What color is it?",opts:["Red","Green","Blue"],a:2},{q:"Where do they go?",opts:["To bed","To school","Out to play"],a:2}] },
     { title:"The Hen", text:"I see a hen. The hen is in the pen. The hen has eggs.", q:[{q:"Where is the hen?",opts:["In the barn","In the pen","In the tree"],a:1},{q:"What does the hen have?",opts:["Chicks","Feathers","Eggs"],a:2},{q:"What animal is it?",opts:["A duck","A hen","A pig"],a:1}] },
     { title:"The Pig", text:"The pig is fat. The pig can dig. The pig is in the mud.", q:[{q:"What does the pig look like?",opts:["Thin","Fat","Small"],a:1},{q:"What can it do?",opts:["Fly","Dig","Sing"],a:1},{q:"Where is the pig?",opts:["In the grass","In the mud","In the water"],a:1}] }
+  ],
+  B: [
+    { title:"At the Park", text:"I like to go to the park. I can play on the slide. The slide is very fast.", q:[{q:"Where does the child go?",opts:["The store","The park","School"],a:1},{q:"What can they play on?",opts:["The slide","The swings","The bike"],a:0},{q:"How is the slide?",opts:["Slow","Fast","Cold"],a:1}] },
+    { title:"The Little Bird", text:"A little bird is in the tree. It is blue and yellow. The bird can sing a song.", q:[{q:"Where is the bird?",opts:["In the house","In the tree","In the water"],a:1},{q:"What colors is the bird?",opts:["Red and black","Blue and yellow","Green and white"],a:1},{q:"What can the bird do?",opts:["Sing a song","Fly a kite","Dig a hole"],a:0}] },
+    { title:"Fishing", text:"We go to the lake to fish. My dad has a big boat. We catch a little fish.", q:[{q:"Where do they go?",opts:["The ocean","The park","The lake"],a:2},{q:"What size is the boat?",opts:["Small","Big","Red"],a:1},{q:"What do they catch?",opts:["A big fish","A frog","A little fish"],a:2}] },
+    { title:"The Blue Bike", text:"I have a new blue bike. I wear my helmet to be safe. I can ride fast.", q:[{q:"What color is the bike?",opts:["Red","Blue","Green"],a:1},{q:"Why do they wear a helmet?",opts:["To look cool","To be safe","To keep warm"],a:1},{q:"How can they ride?",opts:["Slow","Fast","Side ways"],a:1}] },
+    { title:"My School", text:"I go to school every day. My teacher is very nice. I like to read books.", q:[{q:"How often do they go to school?",opts:["Every day","Sometimes","On Mondays"],a:0},{q:"How is the teacher?",opts:["Mean","Nice","Tall"],a:1},{q:"What do they like to do?",opts:["Play tag","Read books","Paint"],a:1}] }
   ]
 };
 
@@ -118,10 +126,8 @@ function toggleMic() {
             }
             const spokenArray = fullTranscript.trim().replace(/[.,!?;]/g, '').split(/\s+/);
             
-            // Only process words we haven't looked at yet
             while (processedWordCount < spokenArray.length) {
-                const word = spokenArray[processedWordCount];
-                processSingleWord(word);
+                processSingleWord(spokenArray[processedWordCount]);
                 processedWordCount++;
             }
         };
@@ -141,21 +147,13 @@ function toggleMic() {
 
 function processSingleWord(spoken) {
     const storyWords = STORIES[currentLevel][storyIdx].text.toLowerCase().replace(/[.,!?;]/g, '').split(' ');
-    
     if (pointer >= storyWords.length) return;
 
-    // 1. Exact Match
     if (spoken === storyWords[pointer]) {
-        markWord(pointer, 'correct');
-        pointer++;
-        correctCount++;
+        markWord(pointer, 'correct'); pointer++; correctCount++;
     } 
-    // 2. Skip Detection (Look ahead 1 word)
     else if (pointer + 1 < storyWords.length && spoken === storyWords[pointer + 1]) {
-        markWord(pointer, 'wrong'); // The one we missed
-        markWord(pointer + 1, 'correct'); // The one we just said
-        pointer += 2;
-        correctCount++;
+        markWord(pointer, 'wrong'); markWord(pointer + 1, 'correct'); pointer += 2; correctCount++;
     }
 }
 
@@ -169,14 +167,12 @@ function markWord(idx, status) {
 function finishReading() {
     const story = STORIES[currentLevel][storyIdx];
     const words = story.text.split(' ');
-    // Mark anything left over as wrong
     for (let i = pointer; i < words.length; i++) markWord(i, 'wrong');
-
     const accuracy = Math.round((correctCount / words.length) * 100);
     const display = document.getElementById('accuracy-display');
     display.textContent = `Accuracy: ${accuracy}%`;
 
-    if (accuracy >= 80) { streak++; display.innerHTML += "<br>🌟 Great Reading!"; }
+    if (accuracy >= 80) { streak++; display.innerHTML += "<br>🌟 Nice Reading!"; }
     else { streak = 0; display.innerHTML += "<br>📚 Try again for a streak!"; }
     
     document.getElementById('streak-display').textContent = streak;
@@ -189,7 +185,7 @@ function finishReading() {
 
 function showQuiz() {
     const quizView = document.getElementById('quiz-view');
-    quizView.innerHTML = "<h3>Quick Quiz</h3>";
+    quizView.innerHTML = "<h3>Story Questions</h3>";
     quizView.style.display = 'block';
     const story = STORIES[currentLevel][storyIdx];
     story.q.forEach((qObj, qi) => {
@@ -219,7 +215,7 @@ function levelUp() {
     let idx = lvls.indexOf(currentLevel);
     if (idx < lvls.length - 1) {
         currentLevel = lvls[idx + 1]; streak = 0; storyIdx = 0;
-        setTimeout(() => alert("🎉 Level Up to " + currentLevel + "!"), 500);
+        setTimeout(() => alert("🎉 AMAZING! You unlocked Level " + currentLevel), 500);
     }
 }
 </script>
