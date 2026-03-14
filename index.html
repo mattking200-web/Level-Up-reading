@@ -17,8 +17,8 @@ body{font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); p
 h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center; margin-bottom:20px;}
 .stats{display:flex; justify-content:space-between; margin-bottom:20px; font-weight:800; background:#f8fafc; padding:10px; border-radius:12px;}
 .story-text{font-size:1.8rem; line-height:1.8; font-weight:700; margin-bottom:20px; text-align:center;}
-.word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: 0.2s;}
-.word.correct{color: var(--mint-dark); text-shadow: 1px 1px #dcfce7;}
+.word{display:inline-block; margin-right:8px; color: #cbd5e1; transition: 0.2s; border-bottom: 3px solid transparent;}
+.word.correct{color: var(--mint-dark); border-bottom-color: var(--mint);}
 .word.wrong{color: var(--error); text-decoration: underline wavy var(--error);}
 .transcript-box {margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 0.9rem; color: #475569; min-height: 40px;}
 .btn{font-family:'Fredoka One',cursive; padding:15px 25px; border-radius:15px; border:none; cursor:pointer; font-size:1.1rem; width:100%; transition: 0.2s;}
@@ -40,7 +40,7 @@ h1{font-family:'Fredoka One',cursive; color:var(--mint-dark); text-align:center;
         </div>
 
         <div id="setup-view">
-            <label><b>Choose Your Level:</b></label>
+            <label><b>Select Level:</b></label>
             <select id="lvl-select" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; font-size:1rem;"></select>
             <button class="btn btn-mic" onclick="startApp()">Start Reading 🚀</button>
         </div>
@@ -79,7 +79,7 @@ const STORIES = {
 };
 
 let currentLevel = "AA", storyIdx = 0, streak = 0, recognition, isListening = false;
-let pointer = 0, correctCount = 0, processedWordCount = 0;
+let storyWordsClean = [];
 
 const select = document.getElementById('lvl-select');
 Object.keys(STORIES).forEach(lvl => {
@@ -104,15 +104,24 @@ function loadStory() {
     document.getElementById('quiz-view').style.display = 'none';
     document.getElementById('mic-btn').style.display = 'block';
     
-    pointer = 0; correctCount = 0; processedWordCount = 0;
     const display = document.getElementById('story-display');
+    // Split using regex to handle any weird web-spacing characters
     const words = story.text.trim().split(/\s+/);
+    storyWordsClean = words.map(w => cleanWord(w));
+    
     display.innerHTML = words.map((w, i) => `<span id="word-${i}" class="word">${w}</span>`).join(' ');
+}
+
+function cleanWord(w) {
+    // Remove all punctuation and symbols, leave only letters
+    return w.replace(/[^\w\s]|_/g, "").toLowerCase().trim();
 }
 
 function toggleMic() {
     if (!recognition) {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Speech) { alert("Your browser does not support speech recognition. Please try Chrome."); return; }
+        
         recognition = new Speech();
         recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
 
@@ -122,12 +131,17 @@ function toggleMic() {
                 fullTranscript += event.results[i][0].transcript.toLowerCase() + " ";
             }
             document.getElementById('live-transcript').textContent = fullTranscript;
-            const spokenArray = fullTranscript.trim().split(/\s+/).map(w => cleanWord(w));
             
-            while (processedWordCount < spokenArray.length) {
-                deepSearchProcess(spokenArray[processedWordCount]);
-                processedWordCount++;
-            }
+            // CHECKLIST LOGIC: Check every word in the transcript against every word in the story
+            const spokenWords = fullTranscript.trim().split(/\s+/).map(w => cleanWord(w));
+            
+            spokenWords.forEach(spoken => {
+                storyWordsClean.forEach((storyW, index) => {
+                    if (isMatch(spoken, storyW)) {
+                        document.getElementById(`word-${index}`).className = "word correct";
+                    }
+                });
+            });
         };
     }
 
@@ -135,7 +149,8 @@ function toggleMic() {
         recognition.stop(); isListening = false;
         document.getElementById('mic-btn').className = "btn btn-mic";
         document.getElementById('mic-btn').textContent = "Click to Speak 🎤";
-        finishReading();
+        // Give it a tiny delay for final words to process before final score
+        setTimeout(finishReading, 500);
     } else {
         recognition.start(); isListening = true;
         document.getElementById('mic-btn').className = "btn btn-mic listening";
@@ -143,69 +158,41 @@ function toggleMic() {
     }
 }
 
-function cleanWord(w) {
-    // Aggressively remove punctuation and special spacing characters
-    return w.replace(/[^\w\s]|_/g, "").toLowerCase().trim();
-}
-
-function isMatch(spoken, storyWord) {
-    if (!spoken || !storyWord) return false;
-    if (spoken === storyWord) return true;
-    if (spoken + 's' === storyWord || storyWord + 's' === spoken) return true;
-    
-    // Fuzzy matching for 80% similarity
-    let matches = 0;
-    for (let i = 0; i < Math.min(spoken.length, storyWord.length); i++) {
-        if (spoken[i] === storyWord[i]) matches++;
-    }
-    return (matches / storyWord.length) >= 0.8;
-}
-
-function deepSearchProcess(spoken) {
-    const storyWords = STORIES[currentLevel][storyIdx].text.split(/\s+/).map(w => cleanWord(w));
-    
-    // Look ahead through the ENTIRE rest of the story to find the word
-    let foundAt = -1;
-    for (let i = pointer; i < storyWords.length; i++) {
-        if (isMatch(spoken, storyWords[i])) {
-            foundAt = i;
-            break;
+function isMatch(spoken, target) {
+    if (spoken === target) return true;
+    // Forgive plurals
+    if (spoken === target + 's' || target === spoken + 's') return true;
+    // Forgive common mishearings/shortening
+    if (target.length > 4 && (spoken.includes(target) || target.includes(spoken))) {
+        // Only if they share a significant portion of the word
+        let overlap = 0;
+        for(let i=0; i < Math.min(spoken.length, target.length); i++) {
+            if(spoken[i] === target[i]) overlap++;
         }
+        if(overlap / target.length > 0.75) return true;
     }
-
-    if (foundAt !== -1) {
-        // Mark everything between current pointer and the found word as "wrong"
-        for (let j = pointer; j < foundAt; j++) {
-            markWord(j, 'wrong');
-        }
-        // Mark the found word as "correct"
-        markWord(foundAt, 'correct');
-        pointer = foundAt + 1;
-        correctCount++;
-    }
-}
-
-function markWord(idx, status) {
-    const el = document.getElementById(`word-${idx}`);
-    if (el && !el.classList.contains('correct')) {
-        // Once a word is correct, we don't overwrite it with wrong
-        if (status === 'wrong' && el.classList.contains('wrong')) return;
-        el.className = `word ${status}`;
-    }
+    return false; 
 }
 
 function finishReading() {
-    const words = STORIES[currentLevel][storyIdx].text.trim().split(/\s+/);
-    for (let i = 0; i < words.length; i++) {
+    let correct = 0;
+    const total = storyWordsClean.length;
+    storyWordsClean.forEach((_, i) => {
         const el = document.getElementById(`word-${i}`);
-        if (!el.classList.contains('correct')) el.classList.add('wrong');
-    }
-    
-    const accuracy = Math.round((correctCount / words.length) * 100);
+        if (el.classList.contains('correct')) {
+            correct++;
+        } else {
+            el.className = "word wrong";
+        }
+    });
+
+    const accuracy = Math.round((correct / total) * 100);
     const display = document.getElementById('accuracy-display');
     display.textContent = `Accuracy: ${accuracy}%`;
+
     if (accuracy >= 80) streak++; else streak = 0;
     document.getElementById('streak-display').textContent = streak;
+
     document.getElementById('mic-btn').style.display = 'none';
     document.getElementById('next-btn').style.display = 'block';
     showQuiz();
@@ -213,15 +200,19 @@ function finishReading() {
 
 function showQuiz() {
     const quizView = document.getElementById('quiz-view');
-    quizView.innerHTML = "<h3>Great Work!</h3>";
+    quizView.innerHTML = "<h3>Story Questions</h3>";
     quizView.style.display = 'block';
     const story = STORIES[currentLevel][storyIdx];
     story.q.forEach((qObj, qi) => {
         const div = document.createElement('div');
-        div.innerHTML = `<p><b>${qObj.q}</b></p>`;
+        div.innerHTML = `<p><b>${qi+1}. ${qObj.q}</b></p>`;
         qObj.opts.forEach((opt, oi) => {
             const b = document.createElement('button'); b.className="opt-btn"; b.textContent = opt;
-            b.onclick = () => { b.style.background = (oi === qObj.a) ? "#dcfce7" : "#fee2e2"; };
+            b.onclick = () => {
+                const btns = div.querySelectorAll('button');
+                btns.forEach(btn => btn.disabled = true);
+                b.style.background = (oi === qObj.a) ? "#dcfce7" : "#fee2e2";
+            };
             div.appendChild(b);
         });
         quizView.appendChild(div);
