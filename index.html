@@ -10,7 +10,7 @@
         body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); padding:16px; display:flex; justify-content:center; }
         .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.1); width:100%; max-width:700px; border:2px solid #e2e8f0; }
         h1 { font-family:'Fredoka One',cursive; color: #16a34a; text-align:center; margin-bottom:10px; }
-        .level-select { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 20px; font-size: 1rem; font-family: inherit; }
+        .level-select { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 20px; font-size: 1rem; font-family: inherit; font-weight: bold; }
         .story-text { font-size:1.6rem; line-height:1.6; font-weight:700; margin-bottom:20px; text-align:center; min-height: 100px; }
         .word { display:inline-block; margin-right:8px; color: #cbd5e1; border-bottom: 3px solid transparent; transition: color 0.3s; }
         .word.correct { color: #16a34a; border-bottom-color: var(--mint); }
@@ -30,9 +30,13 @@
     <h1>Reading Buddy 📚</h1>
     
     <select id="lvl-select" class="level-select" onchange="changeLevel()">
-        <option value="AA">Level AA - Basics</option>
-        <option value="C">Level C - Simple Sentences</option>
-        <option value="D">Level D - Early Reading</option>
+        <option value="AA">Level AA - First Words</option>
+        <option value="A">Level A - Tiny Sentences</option>
+        <option value="B">Level B - Short Stories</option>
+        <option value="C">Level C - Simple Reading</option>
+        <option value="D">Level D - Focus & Flow</option>
+        <option value="E">Level E - Details</option>
+        <option value="F">Level F - Story Length</option>
         <option value="G">Level G-M - Sequencing</option>
         <option value="N">Level N-T - Inference</option>
         <option value="U">Level U-Z - Main Idea</option>
@@ -45,7 +49,7 @@
     
     <div class="transcript-box">
         <b>What I hear:</b><br>
-        <span id="live-transcript" style="color:#2563eb;"><i>Waiting for you to speak...</i></span>
+        <span id="live-transcript" style="color:#2563eb;"><i>Waiting for you...</i></span>
     </div>
 
     <div id="quiz-area" class="quiz-area" style="display:none;"></div>
@@ -55,23 +59,74 @@
 <script>
 const ALL_STORIES = {
     AA: [
-        { title: "The Cat", text: "I see a cat. The cat is big. I like the cat.", q: [{q:"What do I see?", opts:["A dog","A cat"], a:1}, {q:"Is the cat big?", opts:["Yes","No"], a:0}] }
+        { title: "The Cat", text: "I see a cat. The cat is big. I like the cat.", q: [{q:"What do I see?", opts:["A dog","A cat"], a:1}, {q:"Is the cat big?", opts:["Yes","No"], a:0}] },
+        { title: "The Red Bus", text: "The bus is red. The bus is fast. I go on the bus.", q: [{q:"What color is the bus?", opts:["Red","Blue"], a:0}, {q:"Is it fast?", opts:["Yes","No"], a:0}] },
+        { title: "My Dad", text: "My dad is tall. My dad is nice. I love my dad.", q: [{q:"Who is tall?", opts:["My cat","My dad"], a:1}, {q:"Is he nice?", opts:["Yes","No"], a:0}] },
+        { title: "The Hat", text: "I have a hat. The hat is blue. The hat is on me.", q: [{q:"What do I have?", opts:["A hat","A bat"], a:0}, {q:"What color is it?", opts:["Red","Blue"], a:1}] },
+        { title: "A Little Bird", text: "The bird is small. The bird is yellow. It can fly.", q: [{q:"What is small?", opts:["A bird","A bus"], a:0}, {q:"What can it do?", opts:["Fly","Jump"], a:0}] }
+    ],
+    A: [
+        { title: "The Park", text: "I see the sun. I see the grass. I see a tree.", q: [{q:"What do I see in the sky?", opts:["The sun","The moon"], a:0}, {q:"What color is grass?", opts:["Blue","Green"], a:1}] },
+        { title: "My Snack", text: "I have an apple. It is red. I eat it.", q: [{q:"What fruit is it?", opts:["Apple","Banana"], a:0}, {q:"Is the apple blue?", opts:["Yes","No"], a:1}] },
+        { title: "The Dog", text: "The dog is little. The dog is brown. It can run.", q: [{q:"Is the dog big or little?", opts:["Big","Little"], a:1}, {q:"What color is it?", opts:["Black","Brown"], a:1}] },
+        { title: "At School", text: "I have a book. I have a pen. I like school.", q: [{q:"What do I have to read?", opts:["A book","A toy"], a:0}, {q:"Do I like school?", opts:["Yes","No"], a:0}] },
+        { title: "The Rain", text: "The rain is wet. The rain is cold. I see rain.", q: [{q:"Is the rain dry?", opts:["Yes","No"], a:1}, {q:"How does it feel?", opts:["Hot","Cold"], a:1}] }
+    ],
+    B: [
+        { title: "My Big Brother", text: "My brother has a bike. It is a big blue bike. He rides it fast.", q: [{q:"What does the brother have?", opts:["A bike","A car"], a:0}, {q:"What color is the bike?", opts:["Red","Blue"], a:1}] },
+        { title: "The Blue Bird", text: "A blue bird is in the nest. It has three small eggs. The bird stays quiet.", q: [{q:"How many eggs are there?", opts:["Two","Three"], a:1}, {q:"Where is the bird?", opts:["In the nest","In the water"], a:0}] },
+        { title: "A Fun Day", text: "We go to the beach. We play in the sand. We see the big blue ocean.", q: [{q:"Where are we?", opts:["At the park","At the beach"], a:1}, {q:"What do we play in?", opts:["The sand","The grass"], a:0}] },
+        { title: "The Hungry Cat", text: "The cat sees a fish. The fish is in a bowl. The cat wants the fish.", q: [{q:"What does the cat see?", opts:["A dog","A fish"], a:1}, {q:"Where is the fish?", opts:["In a bowl","In the lake"], a:0}] },
+        { title: "My Little Box", text: "I have a little box. A toy is in the box. It is a red car.", q: [{q:"What is in the box?", opts:["A toy car","A cat"], a:0}, {q:"Is the box big?", opts:["Yes","No"], a:1}] }
     ],
     C: [
-        { title: "The Tall Giraffe", text: "The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q: [{q: "What is the giraffe like?", opts: ["Short", "Tall"], a: 1}, {q: "What does it eat?", opts: ["Leaves", "Pizza"], a: 0}] }
+        { title: "The Tall Giraffe", text: "The giraffe is very tall. It has a long neck to eat leaves. It lives in the zoo.", q: [{q: "What is the giraffe like?", opts: ["Short", "Tall"], a: 1}, {q: "What does it eat?", opts: ["Leaves", "Pizza"], a: 0}] },
+        { title: "The Big Boat", text: "The boat is on the blue lake. It has white sails. The wind helps the boat move fast.", q: [{q:"Where is the boat?", opts:["On a lake","On a road"], a:0}, {q:"What moves the boat?", opts:["The wind","A motor"], a:0}] },
+        { title: "Playing Ball", text: "Sam has a big orange ball. He kicks the ball to his friend. They play in the park all day.", q: [{q:"What color is the ball?", opts:["Red","Orange"], a:1}, {q:"Where are they?", opts:["At school","At the park"], a:1}] },
+        { title: "Hungry Rabbit", text: "The rabbit is in the garden. It finds a crunchy carrot to eat. The rabbit is very happy now.", q: [{q:"What did it find?", opts:["A carrot","An apple"], a:0}, {q:"Is the rabbit happy?", opts:["Yes","No"], a:0}] },
+        { title: "The Sleepy Bear", text: "The bear lives in a cold cave. It sleeps all winter long. It wakes up when the sun is warm.", q: [{q:"Where does the bear live?", opts:["In a cave","In a house"], a:0}, {q:"When does it wake up?", opts:["In winter","When it's warm"], a:1}] }
     ],
     D: [
-        { title: "The Busy Bees", text: "The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q: [{q: "What do bees make?", opts: ["Milk", "Honey"], a: 1}, {q: "Where do they fly?", opts: ["Flowers", "The Moon"], a: 0}] },
-        { title: "A Trip to Space", text: "Astronauts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q: [{q: "How do they travel?", opts: ["Big rocket", "Fast car"], a: 0}, {q: "What do they look at?", opts: ["The sun", "Earth"], a: 1}] }
+        { title: "The Busy Bees", text: "The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q: [{q: "What do bees make?", opts: ["Milk", "Honey"], a: 1}, {q: "What do they collect?", opts: ["Nectar", "Water"], a: 0}] },
+        { title: "A Trip to Space", text: "Astronauts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q: [{q: "How do they travel?", opts: ["Big rocket", "Fast car"], a: 0}, {q: "What do they look at?", opts: ["The sun", "Earth"], a: 1}] },
+        { title: "The Loud Drum", text: "Tommy has a new drum. He hits it with two sticks. It makes a very loud sound. Boom boom boom!", q: [{q:"What did Tommy get?", opts:["A drum","A bell"], a:0}, {q:"Is it quiet?", opts:["Yes","No"], a:1}] },
+        { title: "The Blue Whale", text: "The whale is the biggest animal in the sea. It swims in deep water. It breathes air through a hole on its head.", q: [{q:"Where does it swim?", opts:["In the sea","In a pool"], a:0}, {q:"Is it a small animal?", opts:["Yes","No"], a:1}] },
+        { title: "Camping Out", text: "We slept in a green tent. We saw many bright stars at night. We ate sweet marshmallows by the fire.", q: [{q:"Where did they sleep?", opts:["In a tent","In a hotel"], a:0}, {q:"What did they eat?", opts:["Apples","Marshmallows"], a:1}] }
+    ],
+    E: [
+        { title: "The Little Turtle", text: "The turtle walks slowly to the pond. It has a hard shell on its back. If it gets scared, it hides its head inside.", q: [{q:"How does the turtle walk?", opts:["Fast","Slowly"], a:1}, {q:"What is on its back?", opts:["A shell","A hat"], a:0}, {q:"Where does it hide its head?", opts:["In the water","In its shell"], a:1}] },
+        { title: "A Surprise Party", text: "Today is Mom's birthday. Dad is making a big chocolate cake. We put colorful balloons all around the room.", q: [{q:"Whose birthday is it?", opts:["Mom's","Dad's"], a:0}, {q:"What kind of cake is it?", opts:["Vanilla","Chocolate"], a:1}, {q:"What did they put around the room?", opts:["Balloons","Flowers"], a:0}] },
+        { title: "The Helpful Robot", text: "I have a small robot that helps me clean. It can pick up my toys and put them in the bin. It has bright glowing eyes.", q: [{q:"What does the robot do?", opts:["Cleans toys","Makes food"], a:0}, {q:"Where do the toys go?", opts:["In the bed","In the bin"], a:1}, {q:"What glows on the robot?", opts:["Its hands","Its eyes"], a:1}] },
+        { title: "A Day at the Farm", text: "We went to the farm to see the cows. The farmer gave us fresh milk to drink. We also saw five yellow ducks in the pond.", q: [{q:"What did the farmer give them?", opts:["Water","Milk"], a:1}, {q:"How many ducks were there?", opts:["Three","Five"], a:1}, {q:"Where were the ducks?", opts:["In the barn","In the pond"], a:1}] },
+        { title: "The Lost Key", text: "Grampa could not find his house key. We looked under the rug and behind the door. Finally, we found it in his coat pocket.", q: [{q:"What was missing?", opts:["A key","A coat"], a:0}, {q:"Where did they look first?", opts:["Under the rug","In the car"], a:0}, {q:"Where was the key?", opts:["In a pocket","On the table"], a:0}] }
+    ],
+    F: [
+        { title: "The Brave Firefighter", text: "The fire truck is loud and bright red. Firefighters wear heavy suits and helmets to stay safe. They use long hoses to put out the hot flames.", q: [{q:"What color is the fire truck?", opts:["Orange","Red"], a:1}, {q:"Why do they wear helmets?", opts:["To stay safe","To look cool"], a:0}, {q:"What do they use to stop the fire?", opts:["Water hoses","Big shovels"], a:0}] },
+        { title: "The Forest Hike", text: "We hiked up a steep trail in the forest. We saw a deer eating grass near a stream. It heard us and leaped quickly into the green bushes.", q: [{q:"Where were they hiking?", opts:["In the forest","At the beach"], a:0}, {q:"What was the deer doing?", opts:["Sleeping","Eating grass"], a:1}, {q:"How did the deer move away?", opts:["Slowly","Quickly"], a:1}] },
+        { title: "A Trip to the Library", text: "The library is a quiet place with many rows of books. I picked out a book about dinosaurs and sat in a soft chair to read it.", q: [{q:"What is the library like?", opts:["Quiet","Loud"], a:0}, {q:"What was the book about?", opts:["Space","Dinosaurs"], a:1}, {q:"Where did the child sit?", opts:["On the floor","In a soft chair"], a:1}] },
+        { title: "The Hungry Squirrel", text: "A squirrel ran across the fence with an acorn. It began to dig a hole in the soft garden soil. It wanted to save the food for the cold winter.", q: [{q:"What did the squirrel have?", opts:["An acorn","A leaf"], a:0}, {q:"Where did it dig a hole?", opts:["In the grass","In the garden soil"], a:1}, {q:"Why did it save the food?", opts:["For winter","For a friend"], a:0}] },
+        { title: "Baking Cookies", text: "Last night, we baked sugar cookies in the oven. They smelled sweet as they got warm. We waited for them to cool down before we added pink frosting.", q: [{q:"What kind of cookies were they?", opts:["Sugar","Oatmeal"], a:0}, {q:"How did they smell?", opts:["Sweet","Spicy"], a:0}, {q:"What color was the frosting?", opts:["Pink","White"], a:0}] }
     ],
     G: [
-        { title: "The Garden Surprise", text: "First, Kim dug a hole in the dirt. Next, she dropped in a tiny seed. Finally, she watered it and waited for a flower to grow.", q: [{q: "What did Kim do first?", opts: ["Watered the dirt", "Dug a hole"], a: 1}, {q: "What was dropped in the hole?", opts: ["A seed", "A rock"], a: 0}] }
+        { title: "The Garden Surprise", text: "First, Kim dug a hole in the dirt. Next, she dropped in a tiny seed. Finally, she watered it and waited for a flower to grow.", q: [{q: "What did Kim do first?", opts: ["Watered the dirt", "Dug a hole"], a: 1}, {q: "What was dropped in the hole?", opts: ["A seed", "A rock"], a: 0}] },
+        { title: "Making Lunch", text: "First, Ben got two pieces of bread. Next, he put peanut butter on them. Last, he ate his sandwich with a glass of milk.", q: [{q:"What happened last?", opts:["He ate the sandwich","He got bread"], a:0}, {q:"What was on the bread?", opts:["Peanut butter","Jam"], a:0}] },
+        { title: "The Butterfly", text: "First, a tiny egg was on a leaf. Next, a caterpillar crawled out. Finally, it turned into a beautiful butterfly with wings.", q: [{q:"What was on the leaf first?", opts:["A butterfly","An egg"], a:1}, {q:"What happened at the end?", opts:["It got wings","It crawled"], a:0}] },
+        { title: "The Snowman", text: "First, the children rolled three big snowballs. Next, they put a hat on top. Finally, they used a carrot for a nose.", q: [{q:"What did they do first?", opts:["Made snowballs","Found a carrot"], a:0}, {q:"What was used for the nose?", opts:["A hat","A carrot"], a:1}] },
+        { title: "Morning Routine", text: "First, Maya woke up and brushed her teeth. Next, she put on her school clothes. Finally, she ate breakfast and ran to the bus.", q: [{q:"What did Maya do first?", opts:["Brushed teeth","Ate breakfast"], a:0}, {q:"What did she do after dressing?", opts:["Ate breakfast","Woke up"], a:0}] }
     ],
     N: [
-        { title: "The Missing Mitten", text: "Leo looked everywhere for his red mitten. He saw his dog, Buster, hiding under the porch with something fuzzy in his mouth. Leo sighed and reached for a dog treat.", q: [{q: "Why did Leo reach for a dog treat?", opts: ["He was hungry", "To trade for his mitten"], a: 1}, {q: "What color was the mitten?", opts: ["Red", "Blue"], a: 0}] }
+        { title: "The Missing Mitten", text: "Leo looked everywhere for his red mitten. He saw his dog, Buster, hiding under the porch with something fuzzy in his mouth. Leo sighed and reached for a dog treat.", q: [{q: "Why did Leo reach for a dog treat?", opts: ["He was hungry", "To trade for his mitten"], a: 1}, {q: "Where was Buster?", opts: ["In the house", "Under the porch"], a: 1}, {q: "What was in Buster's mouth?", opts: ["A bone", "Something fuzzy"], a: 1}] },
+        { title: "The Wet Umbrella", text: "Sarah walked inside and shook her yellow umbrella. Water splashed all over the floor. She took off her heavy boots and hung up her yellow coat to dry.", q: [{q:"What can you infer about the weather?", opts:["It was sunny","It was raining"], a:1}, {q:"Why did she hang up her coat?", opts:["It was wet","It was new"], a:0}, {q:"What color was her gear?", opts:["Yellow","Blue"], a:0}] },
+        { title: "A New Home", text: "The boxes were piled high in the living room. Tim couldn't find his favorite toy truck. His mom told him that they would unpack his bedroom first so he could sleep in his new bed.", q: [{q:"What is Tim's family doing?", opts:["Moving to a new house","Cleaning the garage"], a:0}, {q:"Why are the boxes piled high?", opts:["They are full of trash","They just moved in"], a:1}, {q:"Which room will they fix first?", opts:["Kitchen","Bedroom"], a:1}] },
+        { title: "The Empty Cookie Jar", text: "Dad walked into the kitchen and saw crumbs on the counter. His son, Max, had chocolate on his face and wouldn't look Dad in the eye. Dad knew exactly where the cookies went.", q: [{q:"Who likely ate the cookies?", opts:["Dad","Max"], a:1}, {q:"How did Dad know?", opts:["Max had chocolate on his face","The jar was broken"], a:0}, {q:"Why wouldn't Max look at Dad?", opts:["He was sleepy","He felt guilty"], a:1}] },
+        { title: "The Dark Sky", text: "The birds stopped singing and the wind began to howl. Farmers rushed to get their animals into the barn. A bright flash lit up the sky followed by a loud boom.", q: [{q:"What was about to happen?", opts:["A storm was coming","The sun was rising"], a:0}, {q:"What was the bright flash?", opts:["A flashlight","Lightning"], a:1}, {q:"Why did the farmers move the animals?", opts:["To keep them safe","To feed them"], a:0}] }
     ],
     U: [
-        { title: "Ocean Giants", text: "Blue whales are the largest animals to ever live. They travel thousands of miles through deep water to find food. We must protect our oceans so these amazing giants have a safe home.", q: [{q: "What is the author's main purpose?", opts: ["To teach about whales and protecting them", "To explain how to swim"], a: 0}, {q: "How far do whales travel?", opts: ["Short distances", "Thousands of miles"], a: 1}] }
+        { title: "Ocean Giants", text: "Blue whales are the largest animals to ever live. They travel thousands of miles through deep water to find food. We must protect our oceans so these amazing giants have a safe home.", q: [{q: "What is the author's main purpose?", opts: ["To teach about whales and conservation", "To explain how to catch fish"], a: 0}, {q: "Why should we protect the ocean?", opts: ["Whales need a safe home", "The water is blue"], a: 0}, {q: "What is a fact about blue whales?", opts: ["They are the largest animals","They live in caves"], a:0}] },
+        { title: "Renewable Energy", text: "Scientists are finding new ways to power our homes using the sun and wind. This is called renewable energy because it never runs out. Using clean energy helps keep our planet healthy for everyone.", q: [{q:"What is the main idea?", opts:["Sun and wind can provide clean power","Pollution is good"], a:0}, {q:"Why is it called 'renewable'?", opts:["It never runs out","It is expensive"], a:0}, {q:"How does clean energy help?", opts:["It keeps the planet healthy","It makes more wind"], a:0}] },
+        { title: "The Great Wall", text: "The Great Wall of China was built a long time ago to protect the country. It is made of stone, brick, and earth. It is thousands of miles long and is one of the most famous structures in the world.", q: [{q:"What is the main idea of this text?", opts:["The history of a famous wall","How to build with bricks"], a:0}, {q:"Why was the wall built?", opts:["To protect the country","To help people walk"], a:0}, {q:"What materials were used?", opts:["Stone and brick","Wood and glass"], a:0}] },
+        { title: "Honeybee Colony", text: "Honeybees live in large groups called colonies. Every bee has a special job to do to help the hive survive. Without honeybees, many of the fruits and vegetables we eat would not be able to grow.", q: [{q:"What is the author's purpose?", opts:["To explain the importance of bees","To tell a story about a queen"], a:0}, {q:"What would happen without bees?", opts:["Plants would grow better","Many foods would not grow"], a:1}, {q:"How do bees live?", opts:["In large groups","By themselves"], a:0}] },
+        { title: "Forest Fires", text: "While some forest fires are dangerous, others can actually help the forest. Small fires clear away dead leaves so new plants can grow. Some tree seeds even need the heat of a fire to open up and sprout.", q: [{q:"What is the main idea?", opts:["Fires can be helpful to forests","All fires are bad"], a:0}, {q:"How do small fires help?", opts:["By clearing dead leaves","By scaring animals"], a:0}, {q:"What do some seeds need to sprout?", opts:["Rain","Heat"], a:1}] }
     ]
 };
 
@@ -118,9 +173,7 @@ function initSpeech() {
             transcript += event.results[i][0].transcript;
         }
         
-        // Robust transcript update
-        const displayBox = document.getElementById('live-transcript');
-        displayBox.innerText = transcript; 
+        document.getElementById('live-transcript').innerText = transcript; 
         
         const spokenWords = transcript.toLowerCase().split(/\s+/);
         spokenWords.forEach(spoken => {
@@ -133,7 +186,6 @@ function initSpeech() {
         });
     };
 
-    recognition.onerror = (e) => console.error("Speech Error: ", e.error);
     recognition.onend = () => { if (isReading) recognition.start(); };
 }
 
@@ -191,7 +243,6 @@ function nextStory() {
     loadStory();
 }
 
-// Start
 loadStory();
 </script>
 </body>
