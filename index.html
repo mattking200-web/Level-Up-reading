@@ -3,51 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reading Buddy 📚</title>
+    <title>Reading Buddy Pro 📚</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
     <style>
-        :root { --mint:#4ade80; --sky:#38bdf8; --bg:#f0fdf4; --text:#1e293b; --error: #ef4444; }
+        :root { --mint:#4ade80; --sky:#38bdf8; --bg:#f8fafc; --text:#1e293b; --error: #ef4444; }
         body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); padding:16px; display:flex; justify-content:center; }
-        .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.1); width:100%; max-width:700px; border:2px solid #e2e8f0; }
+        .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,.05); width:100%; max-width:750px; border:1px solid #e2e8f0; }
         h1 { font-family:'Fredoka One',cursive; color: #16a34a; text-align:center; margin-bottom:10px; }
-        .level-select { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 20px; font-size: 1rem; font-family: inherit; font-weight: bold; }
-        .story-text { font-size:1.6rem; line-height:1.6; font-weight:700; margin-bottom:20px; text-align:center; min-height: 100px; }
-        .word { display:inline-block; margin-right:8px; color: #cbd5e1; border-bottom: 3px solid transparent; transition: color 0.3s; }
+        .level-select { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 20px; font-size: 1rem; font-family: inherit; font-weight: bold; cursor: pointer; }
+        .story-text { font-size:1.7rem; line-height:1.7; font-weight:700; margin-bottom:20px; text-align:center; min-height: 120px; padding: 10px; }
+        .word { display:inline-block; margin-right:8px; color: #cbd5e1; border-bottom: 3px solid transparent; transition: all 0.2s; }
         .word.correct { color: #16a34a; border-bottom-color: var(--mint); }
-        .word.wrong { color: var(--error); text-decoration: underline wavy var(--error); }
-        .mic-btn { font-family:'Fredoka One',cursive; padding:20px; border-radius:15px; border:none; cursor:pointer; font-size:1.2rem; width:100%; background:var(--sky); color:#fff; box-shadow: 0 4px 0 #0284c7; margin-bottom: 15px; }
+        .mic-btn { font-family:'Fredoka One',cursive; padding:18px; border-radius:15px; border:none; cursor:pointer; font-size:1.2rem; width:100%; background:var(--sky); color:#fff; box-shadow: 0 4px 0 #0284c7; margin-bottom: 15px; }
         .mic-btn.listening { background:var(--error); box-shadow: 0 4px 0 #b91c1c; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
-        .transcript-box { margin-top: 10px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 2px solid #cbd5e1; min-height: 60px; font-size: 1.1rem; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.98); } 100% { transform: scale(1); } }
+        .transcript-box { margin-top: 10px; padding: 15px; background: #f1f5f9; border-radius: 12px; border: 2px solid #e2e8f0; min-height: 50px; font-size: 1.1rem; color: #64748b; }
         .quiz-area { margin-top:20px; padding-top:20px; border-top:2px dashed #e2e8f0; }
-        .opt-btn { display:block; width:100%; padding:12px; margin:8px 0; border:2px solid #eee; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; text-align:left; font-family: inherit; }
-        .next-btn { background:var(--mint); color:#fff; margin-top:10px; display:none; font-family:'Fredoka One',cursive; padding:15px; border-radius:15px; border:none; width:100%; cursor:pointer; font-size: 1.1rem; }
+        .opt-btn { display:block; width:100%; padding:14px; margin:8px 0; border:2px solid #e2e8f0; border-radius:12px; background:#fff; font-weight:700; cursor:pointer; text-align:left; font-family: inherit; }
+        .next-btn { background:var(--mint); color:#fff; margin-top:15px; display:none; font-family:'Fredoka One',cursive; padding:18px; border-radius:15px; border:none; width:100%; cursor:pointer; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>Reading Buddy 📚</h1>
+    <h1>Reading Buddy Pro 📚</h1>
     
     <select id="lvl-select" class="level-select" onchange="changeLevel()">
-        <option value="AA">Level AA (Pre-K)</option>
-        <option value="A">Level A (Kindergarten)</option>
-        <option value="B">Level B (Kindergarten)</option>
-        <option value="C">Level C (Grade 1)</option>
-        <option value="D">Level D (Grade 1)</option>
-        <option value="E">Level E (Grade 1)</option>
-        <option value="F">Level F (Grade 1)</option>
-        <option value="G">Level G (Grade 1)</option>
+        <option value="AA">Level AA: One Word Focus</option>
+        <option value="A">Level A: 3-5 Word Patterns</option>
+        <option value="B">Level B: Predictable Sentences</option>
+        <option value="C">Level C: Pattern Breaks</option>
+        <option value="D">Level D: Natural Sentences (5-8 words)</option>
+        <option value="E">Level E: Compound (And/But)</option>
+        <option value="F">Level F: Dialogue ("She said")</option>
+        <option value="G">Level G: Smaller Text / Re-reading</option>
     </select>
 
-    <h2 id="story-title" style="text-align:center; color:var(--sky);"></h2>
+    <h2 id="story-title" style="text-align:center; color:var(--sky); margin:0;"></h2>
     <div id="story-display" class="story-text"></div>
     
     <button id="mic-btn" class="mic-btn" onclick="toggleMic()">Click to Start Reading 🎤</button>
     
     <div class="transcript-box">
-        <b>What I hear:</b><br>
-        <span id="live-transcript" style="color:#2563eb;"><i>Ready for you...</i></span>
+        <b>Listening Log:</b><br>
+        <span id="live-transcript">Ready for you...</span>
     </div>
 
     <div id="quiz-area" class="quiz-area" style="display:none;"></div>
@@ -57,60 +56,28 @@
 <script>
 const ALL_STORIES = {
     AA: [
-        { title: "The Zoo", text: "I see a tiger. I see a hippo. I see a bear. I see a lion.", q: [{q:"What do I see?", opts:["Animals","Cars"], a:0}, {q:"Where am I?", opts:["The park","The zoo"], a:1}] },
-        { title: "Fruit", text: "The apple. The banana. The pear. The orange.", q: [{q:"What is this book about?", opts:["Toys","Fruit"], a:1}, {q:"Is there an apple?", opts:["Yes","No"], a:0}] },
-        { title: "My Pets", text: "My dog. My cat. My bird. My fish.", q: [{q:"Who is in the book?", opts:["My pets","My friends"], a:0}, {q:"Is there a cat?", opts:["Yes","No"], a:0}] },
-        { title: "Big and Little", text: "Big plane. Little plane. Big truck. Little truck.", q: [{q:"What is big?", opts:["The plane","The cat"], a:0}, {q:"What is little?", opts:["The truck","The sun"], a:0}] },
-        { title: "I Can Jump", text: "I jump. You jump. We jump. They jump.", q: [{q:"What can I do?", opts:["Run","Jump"], a:1}, {q:"Who else jumps?", opts:["You","The cat"], a:0}] }
+        { title: "The Farm", text: "Cow. Horse. Pig. Sheep. Farm.", q: [{q:"What is this about?", opts:["The Farm","The City"], a:0}] }
     ],
     A: [
-        { title: "I See Colors", text: "I see a red bird. I see a blue fish. I see a green frog.", q: [{q:"What color is the bird?", opts:["Red","Blue"], a:0}, {q:"What is green?", opts:["The frog","The fish"], a:0}] },
-        { title: "Look at Me", text: "Look at my hat. Look at my shirt. Look at my shoes.", q: [{q:"What should we look at first?", opts:["The hat","The socks"], a:0}, {q:"What is the last item?", opts:["Shoes","Pants"], a:0}] },
-        { title: "The Weather", text: "It is sunny. It is rainy. It is windy. It is snowy.", q: [{q:"How is the weather at the start?", opts:["Sunny","Cold"], a:0}, {q:"Is it windy?", opts:["Yes","No"], a:0}] },
-        { title: "School Tools", text: "I have a pencil. I have a book. I have a desk.", q: [{q:"What do I have to write with?", opts:["A pencil","A crayon"], a:0}, {q:"Do I have a book?", opts:["Yes","No"], a:0}] },
-        { title: "Can You Go?", text: "Can you go up? Can you go down? Can you go in?", q: [{q:"Where can you go first?", opts:["Up","Out"], a:0}, {q:"Can you go down?", opts:["Yes","No"], a:0}] }
+        { title: "I See", text: "I see the cat. I see the dog. I see the bird.", q: [{q:"What is repetitive?", opts:["I see the","Look at"], a:0}] }
     ],
     B: [
-        { title: "The Farm", text: "The cow is in the barn. The horse is in the barn. The pig is in the barn.", q: [{q:"Where are the animals?", opts:["In the house","In the barn"], a:1}, {q:"Which animal is mentioned first?", opts:["The cow","The pig"], a:0}] },
-        { title: "The Garden", text: "We like the red flowers. We like the yellow flowers. We like the blue flowers.", q: [{q:"What do we like?", opts:["Flowers","Trees"], a:0}, {q:"What color were the first flowers?", opts:["Red","Green"], a:0}] },
-        { title: "Playing", text: "He has a big ball. She has a little ball. I have a red ball.", q: [{q:"Who has a big ball?", opts:["He","She"], a:0}, {q:"What color is my ball?", opts:["Blue","Red"], a:1}] },
-        { title: "Getting Dressed", text: "I put on my shirt. I put on my pants. I put on my coat.", q: [{q:"What is put on last?", opts:["A coat","A hat"], a:0}, {q:"What is put on first?", opts:["A shirt","Shoes"], a:0}] },
-        { title: "My Family", text: "Here is my mom. Here is my dad. Here is my sister. Here is me.", q: [{q:"Who is shown first?", opts:["Mom","Dad"], a:0}, {q:"Who is shown last?", opts:["Me","The dog"], a:0}] }
+        { title: "My Clothes", text: "I put on my shirt. I put on my pants. I put on my hat.", q: [{q:"Is the pattern predictable?", opts:["Yes","No"], a:0}] }
     ],
     C: [
-        { title: "A Snack", text: "I am hungry. I want a red apple. I want a yellow banana. It is time to eat.", q: [{q:"How do I feel?", opts:["Hungry","Sleepy"], a:0}, {q:"What fruits do I want?", opts:["Apple and banana","Pear and grape"], a:0}] },
-        { title: "The Hungry Rabbit", text: "The rabbit sees a garden. It sees a long carrot. The rabbit eats the carrot. Yum!", q: [{q:"Where is the rabbit?", opts:["A garden","A house"], a:0}, {q:"What does the rabbit eat?", opts:["A carrot","Grass"], a:0}] },
-        { title: "The Blue Lake", text: "We go to the big lake. We see a small boat. The boat has white sails. It goes fast.", q: [{q:"What do we see at the lake?", opts:["A boat","A car"], a:0}, {q:"What color are the sails?", opts:["Blue","White"], a:1}] },
-        { title: "The New Puppy", text: "I have a new puppy. He is brown and white. He likes to run and jump. He is very fast.", q: [{q:"What color is the puppy?", opts:["Brown and white","Black"], a:0}, {q:"What does the puppy like to do?", opts:["Run and jump","Sleep"], a:0}] },
-        { title: "Bedtime", text: "It is night. The moon is out. I go to my bed. I go to sleep. Goodnight.", q: [{q:"When does this story happen?", opts:["Morning","Night"], a:1}, {q:"What is out in the sky?", opts:["The sun","The moon"], a:1}] }
+        { title: "A Snack", text: "I am hungry today. I want a red apple. I want a yellow banana. It is time to eat.", q: [{q:"Did the pattern break?", opts:["Yes","No"], a:0}] }
     ],
     D: [
-        { title: "The Busy Bees", text: "The bees fly to the flowers. They collect sweet nectar to make honey. We must be careful not to bother them.", q: [{q: "What do bees make?", opts: ["Milk", "Honey"], a: 1}, {q: "Where do they fly?", opts: ["Flowers", "Trees"], a: 0}] },
-        { title: "A Trip to Space", text: "Astronauts travel in a big rocket. They go to the moon and look at Earth. Everything looks very small from up there.", q: [{q: "Where do they go?", opts: ["Sun", "Moon"], a: 1}, {q: "How does Earth look?", opts: ["Small", "Huge"], a: 0}] },
-        { title: "The Sleepy Bear", text: "The big brown bear lives in a cave. He sleeps all winter when it is cold. He wakes up when the spring sun is warm.", q: [{q:"When does the bear sleep?", opts:["Winter","Summer"], a:0}, {q:"Where does the bear live?", opts:["A house","A cave"], a:1}] },
-        { title: "The Fire Truck", text: "The fire truck is bright red. It has a loud siren and a long ladder. It goes fast to help people.", q: [{q:"What color is the truck?", opts:["Red","Yellow"], a:0}, {q:"What does the truck have?", opts:["A ladder","A boat"], a:0}] },
-        { title: "Rainy Day Fun", text: "It is raining outside today. I put on my yellow boots and raincoat. I like to splash in the big puddles.", q: [{q:"What color are the boots?", opts:["Blue","Yellow"], a:1}, {q:"What does the child splash in?", opts:["Puddles","The lake"], a:0}] }
+        { title: "Busy Bees", text: "Bees fly to the flowers. They get nectar to make honey. Do not bother them!", q: [{q:"How many words per sentence?", opts:["2-3","5-8"], a:1}] }
     ],
     E: [
-        { title: "The Little Turtle", text: "The turtle walks slowly to the pond. It has a hard shell on its back and four small legs. If it gets scared, it hides its head inside.", q: [{q:"How does the turtle walk?", opts:["Fast","Slowly"], a:1}, {q:"What is on its back?", opts:["A shell","A hat"], a:0}, {q:"Where does it hide its head?", opts:["In the water","In its shell"], a:1}] },
-        { title: "A Surprise Party", text: "Today is Mom's birthday. Dad is making a big chocolate cake and I am blowing up balloons. It is going to be a great surprise!", q: [{q:"Whose birthday is it?", opts:["Mom's","Dad's"], a:0}, {q:"What kind of cake is it?", opts:["Vanilla","Chocolate"], a:1}, {q:"Is the party a surprise?", opts:["Yes","No"], a:0}] },
-        { title: "The Helpful Robot", text: "I have a small robot that helps me clean. It can pick up my heavy toys and put them in the bin. It has bright eyes that glow.", q: [{q:"What does the robot do?", opts:["Cleans toys","Makes food"], a:0}, {q:"Are the toys heavy?", opts:["Yes","No"], a:0}, {q:"What glows on the robot?", opts:["Its eyes","Its hands"], a:0}] },
-        { title: "A Day at the Farm", text: "We went to the farm to see the cows. The farmer gave us fresh milk to drink. We also saw five yellow ducks in the pond.", q: [{q:"What did the farmer give them?", opts:["Water","Milk"], a:1}, {q:"How many ducks were there?", opts:["Three","Five"], a:1}, {q:"Where were the ducks?", opts:["In the barn","In the pond"], a:1}] },
-        { title: "Lost and Found", text: "Grampa could not find his house key. We looked under the rug and behind the door. Finally, we found it in his blue coat pocket.", q: [{q:"What was missing?", opts:["A key","A coat"], a:0}, {q:"Where did they look?", opts:["Under the rug","In the car"], a:0}, {q:"Where was the key?", opts:["In a pocket","On the table"], a:0}] }
+        { title: "The Turtle", text: "The turtle walks to the pond and it swims. It is slow but it is safe.", q: [{q:"Which connector was used?", opts:["And / But","Because"], a:0}] }
     ],
     F: [
-        { title: "The Brave Firefighter", text: "The fire truck is loud and bright red. 'Get ready!' said the firefighter. They use long hoses to put out the hot flames and keep us safe.", q: [{q:"What color is the truck?", opts:["Orange","Red"], a:1}, {q:"What did the firefighter say?", opts:["'Get ready!'","'Look out!'"], a:0}, {q:"What do they use to stop the fire?", opts:["Water hoses","Big shovels"], a:0}] },
-        { title: "A Trip to the Library", text: "The library is a very quiet place. 'I want to find a book about dinosaurs,' I told the librarian. I found a great book and sat in a soft chair.", q: [{q:"What is the library like?", opts:["Quiet","Loud"], a:0}, {q:"What was the book about?", opts:["Space","Dinosaurs"], a:1}, {q:"Who did the child talk to?", opts:["The librarian","A teacher"], a:0}] },
-        { title: "The Forest Hike", text: "We hiked up a steep trail in the green forest. We saw a deer eating grass near a stream. 'Be quiet,' said Dad. The deer leaped away quickly.", q: [{q:"Where were they hiking?", opts:["In the forest","At the beach"], a:0}, {q:"What was the deer doing?", opts:["Sleeping","Eating grass"], a:1}, {q:"What did Dad say?", opts:["'Be quiet'","'Look over there'"], a:0}] },
-        { title: "The Hungry Squirrel", text: "A squirrel ran across the fence with a brown acorn. It began to dig a hole in the soft garden soil. It wanted to save the food for the cold winter.", q: [{q:"What did the squirrel have?", opts:["An acorn","A leaf"], a:0}, {q:"Where did it dig a hole?", opts:["In the grass","In the garden soil"], a:1}, {q:"Why did it save the food?", opts:["For winter","For a friend"], a:0}] },
-        { title: "Baking Cookies", text: "Last night, we baked sugar cookies in the oven. They smelled sweet as they got warm. 'Do not touch them yet!' said Mom. We waited for them to cool.", q: [{q:"What kind of cookies were they?", opts:["Sugar","Oatmeal"], a:0}, {q:"How did they smell?", opts:["Sweet","Spicy"], a:0}, {q:"Why did they wait?", opts:["To let them cool","To find frosting"], a:0}] }
+        { title: "The Fire", text: "'Get ready!' said the firefighter. He used a long hose to stop the hot fire.", q: [{q:"Who spoke in the story?", opts:["The firefighter","The dog"], a:0}] }
     ],
     G: [
-        { title: "The Garden Surprise", text: "First, Kim dug a hole in the dirt. Next, she dropped in a tiny seed. Finally, she watered it and waited for a beautiful flower to grow.", q: [{q: "What did Kim do first?", opts: ["Watered the dirt", "Dug a hole"], a: 1}, {q: "What was dropped in the hole?", opts: ["A seed", "A rock"], a: 0}, {q: "What grew at the end?", opts: ["A flower","A tree"], a:0}] },
-        { title: "Making Lunch", text: "First, Ben got two pieces of bread. Next, he put peanut butter and jelly on them. Last, he ate his sandwich with a cold glass of milk.", q: [{q:"What happened last?", opts:["He ate the sandwich","He got bread"], a:0}, {q:"What was on the bread?", opts:["Peanut butter and jelly","Cheese"], a:0}, {q:"What did he drink?", opts:["Water","Milk"], a:1}] },
-        { title: "The Butterfly", text: "First, a tiny egg was on a green leaf. Next, a caterpillar crawled out and ate the leaf. Finally, it turned into a beautiful butterfly with wings.", q: [{q:"What was on the leaf first?", opts:["A butterfly","An egg"], a:1}, {q:"What did the caterpillar do?", opts:["Ate the leaf","Slept"], a:0}, {q:"What happened at the end?", opts:["It got wings","It stayed an egg"], a:0}] },
-        { title: "The Snowman", text: "First, the children rolled three big snowballs. Next, they stacked them up and put a hat on top. Finally, they used a carrot for a nose.", q: [{q:"What did they do first?", opts:["Made snowballs","Found a carrot"], a:0}, {q:"What was used for the nose?", opts:["A hat","A carrot"], a:1}, {q:"How many snowballs were there?", opts:["Two","Three"], a:1}] },
-        { title: "Morning Routine", text: "First, Maya woke up and brushed her teeth. Next, she put on her school clothes. Finally, she ate breakfast and ran outside to catch the bus.", q: [{q:"What did Maya do first?", opts:["Brushed teeth","Ate breakfast"], a:0}, {q:"What did she do after dressing?", opts:["Ate breakfast","Woke up"], a:0}, {q:"Where did she go at the end?", opts:["To the bus","To the park"], a:0}] }
+        { title: "The Garden", text: "Last week, we planted a vegetable garden behind the shed. We had to dig deep in the soil before we could drop the tiny seeds. If we don't water them every morning, they will not grow. It takes a long time to see the green sprouts.", q: [{q: "Where is the garden?", opts: ["In the front", "Behind the shed"], a: 1}, {q: "What do the seeds need?", opts: ["Water", "Sand"], a: 0}] }
     ]
 };
 
@@ -119,6 +86,7 @@ let storyIdx = 0;
 let recognition;
 let isReading = false;
 let cleanTargetWords = [];
+let finalTranscript = ""; 
 
 function changeLevel() {
     currentLevel = document.getElementById('lvl-select').value;
@@ -131,9 +99,9 @@ function loadStory() {
     document.getElementById('story-title').innerText = story.title;
     document.getElementById('quiz-area').style.display = 'none';
     document.getElementById('next-story-btn').style.display = 'none';
-    document.getElementById('live-transcript').innerHTML = "<i>Ready...</i>";
+    document.getElementById('live-transcript').innerHTML = "Ready...";
     
-    // Split and clean words
+    finalTranscript = ""; 
     const words = story.text.split(/\s+/);
     cleanTargetWords = words.map(w => w.replace(/[^\w]/g, "").toLowerCase());
     
@@ -144,31 +112,37 @@ function loadStory() {
 
 function initSpeech() {
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Speech) {
-        alert("Speech Recognition not supported in this browser. Please use Chrome.");
-        return;
-    }
     recognition = new Speech();
     recognition.continuous = true;
     recognition.interimResults = true;
     
     recognition.onresult = (event) => {
-        let transcript = "";
+        let interimTranscript = "";
         for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript + " ";
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
         }
         
-        // Update live transcript box
-        document.getElementById('live-transcript').innerText = transcript; 
+        const fullSpokenText = (finalTranscript + interimTranscript).toLowerCase();
+        document.getElementById('live-transcript').innerText = fullSpokenText; 
         
-        const spokenWords = transcript.toLowerCase().split(/\s+/);
+        const spokenWords = fullSpokenText.split(/\s+/).map(s => s.replace(/[^\w]/g, ""));
+        let currentTargetIndex = 0;
+
+        // Sequence Matching (Non-Greedy)
         spokenWords.forEach(spoken => {
-            const s = spoken.replace(/[^\w]/g, "");
-            cleanTargetWords.forEach((target, index) => {
-                if (isMatch(s, target)) {
-                    document.getElementById(`word-${index}`).className = "word correct";
+            if (!spoken) return;
+            // Check if this spoken word matches the next expected target word
+            for (let i = currentTargetIndex; i < cleanTargetWords.length; i++) {
+                if (isMatch(spoken, cleanTargetWords[i])) {
+                    document.getElementById(`word-${i}`).className = "word correct";
+                    currentTargetIndex = i + 1; // Advance pointer so we don't highlight backward
+                    break;
                 }
-            });
+            }
         });
     };
 
@@ -177,7 +151,6 @@ function initSpeech() {
 
 function toggleMic() {
     if (!recognition) initSpeech();
-
     if (isReading) {
         isReading = false;
         recognition.stop();
@@ -186,25 +159,23 @@ function toggleMic() {
         showResults();
     } else {
         isReading = true;
+        finalTranscript = ""; 
+        loadStory(); 
         recognition.start();
-        document.getElementById('mic-btn').innerText = "I'm Listening... Click to Stop";
+        document.getElementById('mic-btn').innerText = "Listening... Click to Stop";
         document.getElementById('mic-btn').classList.add('listening');
     }
 }
 
 function isMatch(s, t) {
     if (!s || !t) return false;
-    // Strict match for short words (AA-A levels)
     if (t.length <= 3) return s === t; 
-    // Fuzzy match for longer words
-    return s === t || s === t + 's' || t === s + 's' || (t.length > 5 && s.startsWith(t.substring(0,4)));
+    return s.includes(t) || t.includes(s) || (t.length > 5 && s.startsWith(t.substring(0,4)));
 }
 
 function showResults() {
     const quizArea = document.getElementById('quiz-area');
     const story = ALL_STORIES[currentLevel][storyIdx];
-    
-    // Clear old quiz
     quizArea.innerHTML = "<h3>Quick Quiz!</h3>";
     
     story.q.forEach((qObj) => {
@@ -233,7 +204,6 @@ function nextStory() {
     loadStory();
 }
 
-// Initialize
 loadStory();
 </script>
 </body>
