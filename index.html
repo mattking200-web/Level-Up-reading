@@ -1,143 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Level Up Literacy: Reading Buddy 📚</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mint:#4ade80; --mint-dark:#16a34a; --sky:#38bdf8; --sky-dark:#0284c7;
+  --coral:#fb7185; --yellow:#fbbf24; --purple:#a78bfa; --orange:#fb923c;
+  --bg:#f0fdf4; --text:#1e293b; --muted:#64748b; --border:#e2e8f0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  min-height:100vh;color:var(--text);padding:16px;
+}
+header{text-align:center;margin-bottom:24px;}
+h1{font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--mint-dark);margin-bottom:8px;}
+.container{max-width:800px;margin:0 auto;}
+
+/* Level Selection Grid */
+.level-grid{display:flex; flex-wrap: wrap; justify-content: center; gap:10px; margin-bottom:24px;}
+.btn-level{
+  background:white; border:2px solid var(--border); border-radius:12px;
+  padding:12px 15px; font-weight:800; cursor:pointer; transition:0.2s;
+}
+.btn-level:hover{border-color:var(--mint); transform:translateY(-2px);}
+.btn-level.active{background:var(--mint); color:white; border-color:var(--mint-dark);}
+
+/* Bookshelf */
+.bookshelf{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:16px;}
+.book-card{
+  background:white; padding:20px; border-radius:16px; border:2px solid var(--border);
+  cursor:pointer; transition:0.3s; box-shadow:0 4px 6px rgba(0,0,0,0.05);
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+}
+.book-card:hover{transform:scale(1.03); box-shadow:0 10px 15px rgba(0,0,0,0.1);}
+.book-icon{font-size:2.5rem; margin-bottom:12px;}
+.book-title{font-weight:700; font-size:1.1rem; color:var(--text);}
+
+/* Reading View */
+.view{display:none;}
+.view.active{display:block;}
+.reading-content{background:white; padding:32px; border-radius:24px; box-shadow:0 10px 25px rgba(0,0,0,0.05); line-height:1.6;}
+.story-text{font-size:2rem; margin-bottom:30px; color:var(--text); white-space:pre-wrap; text-align: center;}
+.nav-btns{display:flex; justify-content:space-between; margin-top:24px;}
+
+/* Quiz */
+.quiz-section{margin-top:40px; border-top:2px solid var(--border); padding-top:24px;}
+.q-box{margin-bottom:24px; background:#f9fafb; padding:16px; border-radius:12px;}
+.q-text{font-weight:700; font-size:1.2rem; margin-bottom:12px;}
+.opt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.opt-btn{
+  padding:12px; background:white; border:1px solid var(--border); border-radius:8px;
+  text-align:left; cursor:pointer; font-weight:600; font-family: inherit;
+}
+.opt-btn:hover:not(.disabled){background:var(--bg);}
+.opt-btn.correct{background:#dcfce7 !important; border-color:#22c55e !important; color: #15803d;}
+.opt-btn.wrong{background:#fee2e2 !important; border-color:#ef4444 !important; color: #b91c1c;}
+
+.quiz-score{text-align:center; padding:16px; border-radius:12px; margin-top:20px; font-weight:800; font-size: 1.2rem;}
+.perfect{background:#dcfce7; color:#15803d;}
+.good{background:#fef9c3; color:#854d0e;}
+
+.btn-back{
+  padding: 8px 16px; background: var(--border); border: none; border-radius: 8px;
+  cursor: pointer; font-weight: 700; margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Reading Buddy 📚</h1>
+    <p>Select your level to see your stories!</p>
+  </header>
+
+  <div id="level-selector" class="level-grid"></div>
+
+  <div id="shelf-view" class="view active">
+    <div id="bookshelf" class="bookshelf"></div>
+  </div>
+
+  <div id="reader-view" class="view">
+    <div class="reading-content">
+      <button class="btn-back" onclick="showShelf()">← Back to Library</button>
+      <h2 id="reading-title" style="text-align: center; color: var(--sky-dark);"></h2>
+      <div id="reading-text" class="story-text"></div>
+      
+      <div id="quiz-area" class="quiz-section"></div>
+      <div id="quiz-score-area"></div>
+    </div>
+  </div>
+</div>
+
+<script>
 const STORIES = {
   AA: [
-    {
-      title: "The Cat",
-      text: "I see a cat. The cat is big. I like the cat.",
-      q: [
-        { q: "What does the child see?", opts: ["A dog", "A cat", "A bird", "A fish"], a: 1 },
-        { q: "What is the cat like?", opts: ["Small", "Fast", "Big", "Soft"], a: 2 },
-        { q: "How does the child feel?", opts: ["Scared", "Likes it", "Mad", "Sad"], a: 1 }
-      ]
-    },
-    {
-      title: "My Dog",
-      text: "My dog is red. My dog can run. I love my dog.",
-      q: [
-        { q: "What color is the dog?", opts: ["Blue", "Black", "Red", "Brown"], a: 2 },
-        { q: "What can the dog do?", opts: ["Swim", "Fly", "Sing", "Run"], a: 3 },
-        { q: "How does the child feel?", opts: ["Loves it", "Fears it", "Dislikes it", "Ignores it"], a: 0 }
-      ]
-    },
-    {
-      title: "The Sun",
-      text: "The sun is up. I see the sun. It is hot.",
-      q: [
-        { q: "Where is the sun?", opts: ["Down", "Behind clouds", "Up", "In the water"], a: 2 },
-        { q: "What does the child see?", opts: ["The moon", "The sun", "A star", "A cloud"], a: 1 },
-        { q: "What is the sun like?", opts: ["Cold", "Wet", "Dark", "Hot"], a: 3 }
-      ]
-    },
-    {
-      title: "The Red Apple",
-      text: "I see an apple. The apple is red. I eat the apple.",
-      q: [
-        { q: "What does the child see?", opts: ["A pear", "A banana", "An apple", "A grape"], a: 2 },
-        { q: "What color is the apple?", opts: ["Green", "Yellow", "Red", "Pink"], a: 2 },
-        { q: "What does the child do?", opts: ["Throws it", "Eats it", "Hides it", "Paints it"], a: 1 }
-      ]
-    },
-    {
-      title: "The Blue Bird",
-      text: "I see a bird. The bird is blue. The bird can fly.",
-      q: [
-        { q: "What does the child see?", opts: ["A bird", "A plane", "A bee", "A kite"], a: 0 },
-        { q: "What color is the bird?", opts: ["Red", "Blue", "Black", "Yellow"], a: 1 },
-        { q: "What can the bird do?", opts: ["Swim", "Fly", "Talk", "Run"], a: 1 }
-      ]
-    }
+    { title: "The Cat", text: "I see a cat. The cat is big. I like the cat.", q: [{ q: "What does the child see?", opts: ["A dog", "A cat", "A bird", "A fish"], a: 1 }, { q: "What is the cat like?", opts: ["Small", "Fast", "Big", "Soft"], a: 2 }, { q: "How does the child feel?", opts: ["Scared", "Likes it", "Mad", "Sad"], a: 1 }] },
+    { title: "My Dog", text: "My dog is red. My dog can run. I love my dog.", q: [{ q: "What color is the dog?", opts: ["Blue", "Black", "Red", "Brown"], a: 2 }, { q: "What can the dog do?", opts: ["Swim", "Fly", "Sing", "Run"], a: 3 }, { q: "How does the child feel?", opts: ["Loves it", "Fears it", "Dislikes it", "Ignores it"], a: 0 }] },
+    { title: "The Sun", text: "The sun is up. I see the sun. It is hot.", q: [{ q: "Where is the sun?", opts: ["Down", "Behind clouds", "Up", "In the water"], a: 2 }, { q: "What does the child see?", opts: ["The moon", "The sun", "A star", "A cloud"], a: 1 }, { q: "What is the sun like?", opts: ["Cold", "Wet", "Dark", "Hot"], a: 3 }] },
+    { title: "The Red Apple", text: "I see an apple. The apple is red. I eat the apple.", q: [{ q: "What does the child see?", opts: ["A pear", "A banana", "An apple", "A grape"], a: 2 }, { q: "What color is the apple?", opts: ["Green", "Yellow", "Red", "Pink"], a: 2 }, { q: "What does the child do?", opts: ["Throws it", "Eats it", "Hides it", "Paints it"], a: 1 }] },
+    { title: "The Blue Bird", text: "I see a bird. The bird is blue. The bird can fly.", q: [{ q: "What does the child see?", opts: ["A bird", "A plane", "A bee", "A kite"], a: 0 }, { q: "What color is the bird?", opts: ["Red", "Blue", "Black", "Yellow"], a: 1 }, { q: "What can the bird do?", opts: ["Swim", "Fly", "Talk", "Run"], a: 1 }] }
   ],
   A: [
-    {
-      title: "I Can Jump",
-      text: "I can jump. I can run. I can hop. I can play. It is fun.",
-      q: [
-        { q: "What is one thing the child can do?", opts: ["Swim", "Jump", "Fly", "Climb"], a: 1 },
-        { q: "What does the child say about playing?", opts: ["It is hard", "It is boring", "It is fun", "It is loud"], a: 2 },
-        { q: "Which of these can the child do?", opts: ["Swim", "Fly", "Hop", "Drive"], a: 2 }
-      ]
-    },
-    {
-      title: "The Big Box",
-      text: "I see a big box. The box is red. I put my toys in the box. I like my box.",
-      q: [
-        { q: "What color is the box?", opts: ["Blue", "Green", "Red", "Yellow"], a: 2 },
-        { q: "What does the child put in the box?", opts: ["Books", "Toys", "Food", "Clothes"], a: 1 },
-        { q: "How does the child feel about the box?", opts: ["Hates it", "Likes it", "Fears it", "Breaks it"], a: 1 }
-      ]
-    },
-    {
-      title: "The Small House",
-      text: "I see a house. The house is small. My cat lives here. My dog lives here.",
-      q: [
-        { q: "What does the child see?", opts: ["A school", "A house", "A park", "A store"], a: 1 },
-        { q: "What is the house like?", opts: ["Big", "Cold", "Old", "Small"], a: 3 },
-        { q: "Who lives in the house?", opts: ["A bird", "A fish", "A cat and dog", "A cow"], a: 2 }
-      ]
-    },
-    {
-      title: "My Green Shirt",
-      text: "I have a shirt. My shirt is green. I put it on. I look good.",
-      q: [
-        { q: "What does the child have?", opts: ["A hat", "A shirt", "A coat", "A belt"], a: 1 },
-        { q: "What color is the shirt?", opts: ["Blue", "Red", "Green", "Yellow"], a: 2 },
-        { q: "How does the child look?", opts: ["Sad", "Good", "Funny", "Bad"], a: 1 }
-      ]
-    },
-    {
-      title: "Look at the Fish",
-      text: "Look at the fish. The fish is little. The fish can swim. I like the fish.",
-      q: [
-        { q: "What should we look at?", opts: ["A frog", "A boat", "A fish", "A duck"], a: 2 },
-        { q: "What is the fish like?", opts: ["Big", "Little", "Fast", "Red"], a: 1 },
-        { q: "What can the fish do?", opts: ["Fly", "Run", "Walk", "Swim"], a: 3 }
-      ]
-    }
+    { title: "I Can Jump", text: "I can jump. I can run. I can hop. I can play. It is fun.", q: [{ q: "What is one thing the child can do?", opts: ["Swim", "Jump", "Fly", "Climb"], a: 1 }, { q: "What does the child say about playing?", opts: ["It is hard", "It is boring", "It is fun", "It is loud"], a: 2 }, { q: "Which of these can the child do?", opts: ["Swim", "Fly", "Hop", "Drive"], a: 2 }] },
+    { title: "The Big Box", text: "I see a big box. The box is red. I put my toys in the box. I like my box.", q: [{ q: "What color is the box?", opts: ["Blue", "Green", "Red", "Yellow"], a: 2 }, { q: "What does the child put in the box?", opts: ["Books", "Toys", "Food", "Clothes"], a: 1 }, { q: "How does the child feel about the box?", opts: ["Hates it", "Likes it", "Fears it", "Breaks it"], a: 1 }] },
+    { title: "The Small House", text: "I see a house. The house is small. My cat lives here. My dog lives here.", q: [{ q: "What does the child see?", opts: ["A school", "A house", "A park", "A store"], a: 1 }, { q: "What is the house like?", opts: ["Big", "Cold", "Old", "Small"], a: 3 }, { q: "Who lives in the house?", opts: ["A bird", "A fish", "A cat and dog", "A cow"], a: 2 }] },
+    { title: "My Green Shirt", text: "I have a shirt. My shirt is green. I put it on. I look good.", q: [{ q: "What does the child have?", opts: ["A hat", "A shirt", "A coat", "A belt"], a: 1 }, { q: "What color is the shirt?", opts: ["Blue", "Red", "Green", "Yellow"], a: 2 }, { q: "How does the child look?", opts: ["Sad", "Good", "Funny", "Bad"], a: 1 }] },
+    { title: "Look at the Fish", text: "Look at the fish. The fish is little. The fish can swim. I like the fish.", q: [{ q: "What should we look at?", opts: ["A frog", "A boat", "A fish", "A duck"], a: 2 }, { q: "What is the fish like?", opts: ["Big", "Little", "Fast", "Red"], a: 1 }, { q: "What can the fish do?", opts: ["Fly", "Run", "Walk", "Swim"], a: 3 }] }
   ],
   B: [
-    {
-      title: "At the Park",
-      text: "We go to the park. I see a slide. I can go up and down. My dad is here. We have fun at the park.",
-      q: [
-        { q: "Where do they go?", opts: ["The beach", "The park", "The store", "The school"], a: 1 },
-        { q: "What does the child see at the park?", opts: ["A swing", "A slide", "A pond", "A tree"], a: 1 },
-        { q: "Who is at the park with the child?", opts: ["Their mom", "Their friend", "Their dad", "Their teacher"], a: 2 }
-      ]
-    },
-    {
-      title: "My Bed",
-      text: "My bed is soft. I get in my bed at night. I put my head on the pillow. My mom says good night. I go to sleep.",
-      q: [
-        { q: "What is the bed like?", opts: ["Hard", "Soft", "Cold", "Small"], a: 1 },
-        { q: "What does the child put their head on?", opts: ["A blanket", "A teddy", "The floor", "The pillow"], a: 3 },
-        { q: "Who says good night?", opts: ["Dad", "A friend", "Brother", "Mom"], a: 3 }
-      ]
-    },
-    {
-      title: "The Big Bus",
-      text: "I see a big bus. The bus is yellow. I get on the bus. I go to my school. My teacher is there.",
-      q: [
-        { q: "What color is the bus?", opts: ["Blue", "Yellow", "Red", "Green"], a: 1 },
-        { q: "Where does the bus go?", opts: ["The park", "The zoo", "The school", "Home"], a: 2 },
-        { q: "Who is at the school?", opts: ["Dad", "The teacher", "The cat", "Mom"], a: 1 }
-      ]
-    },
-    {
-      title: "The Little Ant",
-      text: "I see an ant. The ant is very small. It is on the leaf. It has six legs. It is a busy ant.",
-      q: [
-        { q: "What does the child see?", opts: ["A bee", "A fly", "An ant", "A worm"], a: 2 },
-        { q: "Where is the ant?", opts: ["On a rock", "On the leaf", "In the water", "In the box"], a: 1 },
-        { q: "How many legs does it have?", opts: ["Two", "Four", "Six", "Eight"], a: 2 }
-      ]
-    },
-    {
-      title: "Rainy Day Fun",
-      text: "The rain comes down. I put on my boots. I jump in a puddle. My dog jumps too. We are very wet.",
-      q: [
-        { q: "What comes down?", opts: ["Snow", "The sun", "Rain", "Leaves"], a: 2 },
-        { q: "What does the child put on?", opts: ["A hat", "Boots", "A coat", "Gloves"], a: 1 },
-        { q: "How do they feel at the end?", opts: ["Dry", "Hot", "Sad", "Wet"], a: 3 }
-      ]
-    }
+    { title: "At the Park", text: "We go to the park. I see a slide. I can go up and down. My dad is here. We have fun at the park.", q: [{ q: "Where do they go?", opts: ["The beach", "The park", "The store", "The school"], a: 1 }, { q: "What does the child see at the park?", opts: ["A swing", "A slide", "A pond", "A tree"], a: 1 }, { q: "Who is at the park with the child?", opts: ["Their mom", "Their friend", "Their dad", "Their teacher"], a: 2 }] },
+    { title: "My Bed", text: "My bed is soft. I get in my bed at night. I put my head on the pillow. My mom says good night. I go to sleep.", q: [{ q: "What is the bed like?", opts: ["Hard", "Soft", "Cold", "Small"], a: 1 }, { q: "What does the child put their head on?", opts: ["A blanket", "A teddy", "The floor", "The pillow"], a: 3 }, { q: "Who says good night?", opts: ["Dad", "A friend", "Brother", "Mom"], a: 3 }] },
+    { title: "The Big Bus", text: "I see a big bus. The bus is yellow. I get on the bus. I go to my school. My teacher is there.", q: [{ q: "What color is the bus?", opts: ["Blue", "Yellow", "Red", "Green"], a: 1 }, { q: "Where does the bus go?", opts: ["The park", "The zoo", "The school", "Home"], a: 2 }, { q: "Who is at the school?", opts: ["Dad", "The teacher", "The cat", "Mom"], a: 1 }] },
+    { title: "The Little Ant", text: "I see an ant. The ant is very small. It is on the leaf. It has six legs. It is a busy ant.", q: [{ q: "What does the child see?", opts: ["A bee", "A fly", "An ant", "A worm"], a: 2 }, { q: "Where is the ant?", opts: ["On a rock", "On the leaf", "In the water", "In the box"], a: 1 }, { q: "How many legs does it have?", opts: ["Two", "Four", "Six", "Eight"], a: 2 }] },
+    { title: "Rainy Day Fun", text: "The rain comes down. I put on my boots. I jump in a puddle. My dog jumps too. We are very wet.", q: [{ q: "What comes down?", opts: ["Snow", "The sun", "Rain", "Leaves"], a: 2 }, { q: "What does the child put on?", opts: ["A hat", "Boots", "A coat", "Gloves"], a: 1 }, { q: "How do they feel at the end?", opts: ["Dry", "Hot", "Sad", "Wet"], a: 3 }] }
   ]
 };
+
+let currentLevel = 'AA';
+let quizAnswers = {};
+
+function init() {
+  const levels = ["AA","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+  const grid = document.getElementById('level-selector');
+  levels.forEach(lvl => {
+    const b = document.createElement('button');
+    b.className = 'btn-level' + (lvl === currentLevel ? ' active' : '');
+    b.textContent = lvl;
+    b.onclick = () => selectLevel(lvl);
+    grid.appendChild(b);
+  });
+  renderShelf();
+}
+
+function selectLevel(lvl) {
+  currentLevel = lvl;
+  document.querySelectorAll('.btn-level').forEach(b => b.classList.toggle('active', b.textContent === lvl));
+  showShelf();
+  renderShelf();
+}
+
+function renderShelf() {
+  const shelf = document.getElementById('bookshelf');
+  shelf.innerHTML = '';
+  const list = STORIES[currentLevel] || [];
+  if (list.length === 0) {
+    shelf.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--muted); margin-top: 20px;">Stories for Level ${currentLevel} are being written! Try AA, A, or B.</p>`;
+    return;
+  }
+  list.forEach((book, idx) => {
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.innerHTML = `<div class="book-icon">📖</div><div class="book-title">${book.title}</div>`;
+    card.onclick = () => openBook(idx);
+    shelf.appendChild(card);
+  });
+}
+
+function openBook(idx) {
+  const book = STORIES[currentLevel][idx];
+  document.getElementById('reading-title').textContent = book.title;
+  document.getElementById('reading-text').textContent = book.text;
+  document.getElementById('shelf-view').classList.remove('active');
+  document.getElementById('reader-view').classList.add('active');
+  quizAnswers = {};
+  renderQuiz(book.q);
+}
+
+function showShelf() {
+  document.getElementById('reader-view').classList.remove('active');
+  document.getElementById('shelf-view').classList.add('active');
+  document.getElementById('quiz-score-area').innerHTML = '';
+}
+
+function renderQuiz(questions) {
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = '<h3>Quick Quiz!</h3>';
+  questions.forEach((qObj, qIdx) => {
+    const box = document.createElement('div');
+    box.className = 'q-box';
+    box.innerHTML = `<div class="q-text">${qIdx + 1}. ${qObj.q}</div>`;
+    const optsDiv = document.createElement('div');
+    optsDiv.className = 'opt-grid';
+    qObj.opts.forEach((opt, oIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(btn, oIdx, qObj.a, qIdx, questions.length);
+      optsDiv.appendChild(btn);
+    });
+    box.appendChild(optsDiv);
+    area.appendChild(box);
+  });
+}
+
+function checkAnswer(btn, selected, correct, qIdx, total) {
+  const parent = btn.parentElement;
+  if (parent.dataset.answered) return;
+  parent.dataset.answered = "true";
+
+  const btns = parent.querySelectorAll('.opt-btn');
+  btns[correct].classList.add('correct');
+  if (selected !== correct) {
+    btn.classList.add('wrong');
+  } else {
+    quizAnswers[qIdx] = true;
+  }
+  
+  if (Object.keys(quizAnswers).length === total || (qIdx + 1 === total)) {
+    const count = Object.values(quizAnswers).filter(v => v === true).length;
+    const scoreArea = document.getElementById('quiz-score-area');
+    let cls = count === total ? 'perfect' : 'good';
+    scoreArea.innerHTML = `<div class="quiz-score ${cls}">${count === total ? '🏆 Perfect Score!' : '⭐ Great effort!'} You got ${count} out of ${total} correct!</div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
