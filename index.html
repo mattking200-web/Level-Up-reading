@@ -20,40 +20,36 @@ header{text-align:center; margin-bottom:24px;}
 h1{font-family:'Fredoka One',cursive; font-size:2.5rem; color:var(--mint-dark); margin-bottom:8px;}
 .container{max-width:800px; margin:0 auto;}
 
+/* Progress Bar */
+.progress-container { width: 100%; background: #e2e8f0; height: 12px; border-radius: 10px; margin: 20px 0; overflow: hidden; display: none; }
+#progress-bar { width: 0%; height: 100%; background: var(--mint); transition: width 0.3s ease; }
+
 .level-grid{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:24px;}
-.btn-level{
-  background:white; border:2px solid var(--border); border-radius:12px;
-  padding:12px 15px; font-weight:800; cursor:pointer; transition:0.2s;
-}
+.btn-level{ background:white; border:2px solid var(--border); border-radius:12px; padding:12px 15px; font-weight:800; cursor:pointer; }
 .btn-level.active{background:var(--mint); color:white; border-color:var(--mint-dark);}
 
 .bookshelf{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:16px;}
-.book-card{
-  background:white; padding:20px; border-radius:16px; border:2px solid var(--border);
-  cursor:pointer; text-align:center;
-}
+.book-card{ background:white; padding:20px; border-radius:16px; border:2px solid var(--border); cursor:pointer; text-align:center; }
 
 .view{display:none;}
 .view.active{display:block;}
 .reading-content{background:white; padding:32px; border-radius:24px; box-shadow:0 10px 25px rgba(0,0,0,0.05);}
 
-/* Speech Tracking Styles */
-.word{display:inline-block; margin-right:8px; font-size:2.2rem; transition:0.2s; color:#94a3b8;}
-.word.read{color:var(--text); font-weight:800; transform:scale(1.1);}
-.word.current{color:var(--sky); text-decoration:underline; transform:scale(1.2);}
+.word{display:inline-block; margin-right:8px; font-size:2.2rem; color:#94a3b8; transition:0.2s;}
+.word.read{color:var(--text); font-weight:800;}
 
 .controls{display:flex; gap:10px; margin-bottom:20px; justify-content:center;}
 .btn{padding:12px 24px; border-radius:12px; border:none; font-weight:700; cursor:pointer;}
 .btn-mic{background:var(--coral); color:white;}
-.btn-mic.listening{background:var(--mint-dark); animation:pulse 1.5s infinite;}
-
-@keyframes pulse{ 0%{opacity:1;} 50%{opacity:0.6;} 100%{opacity:1;} }
+.btn-mic.listening{background:var(--mint-dark);}
+.btn-next{background:var(--sky); color:white; display:none; margin: 20px auto;}
 
 .quiz-section{margin-top:40px; border-top:2px solid var(--border); padding-top:24px; display:none;}
 .opt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-.opt-btn{padding:12px; background:white; border:1px solid var(--border); border-radius:8px; cursor:pointer;}
+.opt-btn{padding:12px; background:white; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-family: inherit;}
 .opt-btn.correct{background:#dcfce7 !important; border-color:#22c55e !important;}
 .opt-btn.wrong{background:#fee2e2 !important; border-color:#ef4444 !important;}
+.quiz-score-display { text-align: center; font-size: 1.5rem; font-weight: 800; margin-top: 20px; color: var(--mint-dark); }
 </style>
 </head>
 <body>
@@ -71,6 +67,8 @@ h1{font-family:'Fredoka One',cursive; font-size:2.5rem; color:var(--mint-dark); 
       <button class="btn" onclick="showShelf()">← Back</button>
       <h2 id="reading-title" style="text-align:center; margin-bottom:20px;"></h2>
       
+      <div class="progress-container" id="p-cont"><div id="progress-bar"></div></div>
+
       <div class="controls">
         <button id="mic-btn" class="btn btn-mic" onclick="toggleListening()">Start Reading Out Loud 🎤</button>
       </div>
@@ -79,12 +77,13 @@ h1{font-family:'Fredoka One',cursive; font-size:2.5rem; color:var(--mint-dark); 
       
       <div id="quiz-area" class="quiz-section"></div>
       <div id="quiz-score-area"></div>
+      <button id="next-story-btn" class="btn btn-next" onclick="loadNextStory()">Next Story ➔</button>
     </div>
   </div>
 </div>
 
 <script>
-// STORIES (Truncated for space, using the 5 stories per level you requested)
+// Use the STORIES object from previous turn...
 const STORIES = {
   AA: [
     { title: "The Cat", text: "I see a cat. The cat is big. I like the cat.", q: [{ q: "What does the child see?", opts: ["A dog", "A cat", "A bird", "A fish"], a: 1 }, { q: "What is the cat like?", opts: ["Small", "Fast", "Big", "Soft"], a: 2 }, { q: "How does the child feel?", opts: ["Scared", "Likes it", "Mad", "Sad"], a: 1 }] },
@@ -114,9 +113,11 @@ let currentWords = [];
 let wordIndex = 0;
 let recognition;
 let isListening = false;
+let currentBookIdx = 0;
+let score = 0;
 
 function init() {
-  const levels = ["AA","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
+  const levels = ["AA","A","B","C","D","E","F"];
   const grid = document.getElementById('level-selector');
   levels.forEach(lvl => {
     const b = document.createElement('button');
@@ -133,11 +134,13 @@ function init() {
     recognition.lang = 'en-US';
 
     recognition.onresult = (event) => {
+      let finalTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          processSpeech(event.results[i][0].transcript);
+          finalTranscript += event.results[i][0].transcript;
         }
       }
+      if(finalTranscript) processSpeech(finalTranscript);
     };
   }
   renderShelf();
@@ -153,12 +156,11 @@ function selectLevel(lvl) {
 function renderShelf() {
   const shelf = document.getElementById('bookshelf');
   shelf.innerHTML = '';
-  const list = STORIES[currentLevel] || [];
-  list.forEach((book, idx) => {
+  (STORIES[currentLevel] || []).forEach((book, idx) => {
     const card = document.createElement('div');
     card.className = 'book-card';
     card.innerHTML = `<h3>${book.title}</h3>`;
-    card.onclick = () => openBook(idx);
+    card.onclick = () => { currentBookIdx = idx; openBook(idx); };
     shelf.appendChild(card);
   });
 }
@@ -169,11 +171,13 @@ function openBook(idx) {
   document.getElementById('reading-title').textContent = book.title;
   document.getElementById('shelf-view').classList.remove('active');
   document.getElementById('reader-view').classList.add('active');
+  document.getElementById('p-cont').style.display = 'block';
   
   const container = document.getElementById('word-container');
   container.innerHTML = '';
   currentWords = book.text.split(/\s+/);
   wordIndex = 0;
+  updateProgress();
   
   currentWords.forEach((w, i) => {
     const span = document.createElement('span');
@@ -185,20 +189,21 @@ function openBook(idx) {
   
   document.getElementById('quiz-area').style.display = 'none';
   document.getElementById('quiz-score-area').innerHTML = '';
+  document.getElementById('next-story-btn').style.display = 'none';
+  document.getElementById('mic-btn').style.display = 'block';
 }
 
 function toggleListening() {
-  const btn = document.getElementById('mic-btn');
   if (!isListening) {
     recognition.start();
     isListening = true;
-    btn.textContent = "Listening... Keep reading!";
-    btn.classList.add('listening');
+    document.getElementById('mic-btn').textContent = "🎤 Listening...";
+    document.getElementById('mic-btn').classList.add('listening');
   } else {
     recognition.stop();
     isListening = false;
-    btn.textContent = "Start Reading Out Loud 🎤";
-    btn.classList.remove('listening');
+    document.getElementById('mic-btn').textContent = "Start Reading Out Loud 🎤";
+    document.getElementById('mic-btn').classList.remove('listening');
   }
 }
 
@@ -207,28 +212,33 @@ function processSpeech(transcript) {
   spokenWords.forEach(spoken => {
     if (wordIndex < currentWords.length) {
       const target = currentWords[wordIndex].toLowerCase().replace(/[.,!?;:]/g, '');
+      // Check if current or next word matches to prevent getting "stuck"
       if (spoken === target) {
         document.getElementById(`word-${wordIndex}`).classList.add('read');
         wordIndex++;
-        if (wordIndex === currentWords.length) {
-          finishReading();
-        }
+        updateProgress();
+        if (wordIndex === currentWords.length) finishReading();
       }
     }
   });
 }
 
+function updateProgress() {
+  const percent = (wordIndex / currentWords.length) * 100;
+  document.getElementById('progress-bar').style.width = percent + '%';
+}
+
 function finishReading() {
-  recognition.stop();
-  isListening = false;
+  if(isListening) toggleListening();
   document.getElementById('mic-btn').style.display = 'none';
   document.getElementById('quiz-area').style.display = 'block';
   renderQuiz(currentBook.q);
 }
 
 function renderQuiz(questions) {
+  score = 0;
   const area = document.getElementById('quiz-area');
-  area.innerHTML = '<h3>Great reading! Now a quick quiz:</h3>';
+  area.innerHTML = '<h3>Quiz Time!</h3>';
   questions.forEach((qObj, qIdx) => {
     const box = document.createElement('div');
     box.className = 'q-box';
@@ -240,9 +250,16 @@ function renderQuiz(questions) {
       btn.className = 'opt-btn';
       btn.textContent = opt;
       btn.onclick = () => {
+        if(optsDiv.dataset.answered) return;
+        optsDiv.dataset.answered = "true";
         const btns = optsDiv.querySelectorAll('button');
         btns[qObj.a].classList.add('correct');
-        if (oIdx !== qObj.a) btn.classList.add('wrong');
+        if (oIdx === qObj.a) score++;
+        else btn.classList.add('wrong');
+        
+        if (document.querySelectorAll('[data-answered]').length === questions.length) {
+          showFinalScore(questions.length);
+        }
       };
       optsDiv.appendChild(btn);
     });
@@ -251,11 +268,25 @@ function renderQuiz(questions) {
   });
 }
 
+function showFinalScore(total) {
+  const scoreArea = document.getElementById('quiz-score-area');
+  scoreArea.innerHTML = `<div class="quiz-score-display">You scored ${score} out of ${total}!</div>`;
+  document.getElementById('next-story-btn').style.display = 'block';
+}
+
+function loadNextStory() {
+  currentBookIdx++;
+  if (currentBookIdx < STORIES[currentLevel].length) {
+    openBook(currentBookIdx);
+  } else {
+    alert("You finished all stories in this level! Great job!");
+    showShelf();
+  }
+}
+
 function showShelf() {
-  if(isListening) toggleListening();
   document.getElementById('reader-view').classList.remove('active');
   document.getElementById('shelf-view').classList.add('active');
-  document.getElementById('mic-btn').style.display = 'block';
 }
 
 init();
