@@ -1,210 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reading Buddy Pro 📚</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
-    <style>
-        :root { --mint:#4ade80; --sky:#38bdf8; --bg:#f8fafc; --text:#1e293b; --error: #ef4444; }
-        body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); padding:16px; display:flex; justify-content:center; }
-        .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,.05); width:100%; max-width:750px; border:1px solid #e2e8f0; }
-        h1 { font-family:'Fredoka One',cursive; color: #16a34a; text-align:center; margin-bottom:10px; }
-        .level-select { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #cbd5e1; margin-bottom: 20px; font-size: 1rem; font-family: inherit; font-weight: bold; cursor: pointer; }
-        .story-text { font-size:1.7rem; line-height:1.7; font-weight:700; margin-bottom:20px; text-align:center; min-height: 120px; padding: 10px; }
-        .word { display:inline-block; margin-right:8px; color: #cbd5e1; border-bottom: 3px solid transparent; transition: all 0.2s; }
-        .word.correct { color: #16a34a; border-bottom-color: var(--mint); }
-        .mic-btn { font-family:'Fredoka One',cursive; padding:18px; border-radius:15px; border:none; cursor:pointer; font-size:1.2rem; width:100%; background:var(--sky); color:#fff; box-shadow: 0 4px 0 #0284c7; margin-bottom: 15px; }
-        .mic-btn.listening { background:var(--error); box-shadow: 0 4px 0 #b91c1c; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.98); } 100% { transform: scale(1); } }
-        .transcript-box { margin-top: 10px; padding: 15px; background: #f1f5f9; border-radius: 12px; border: 2px solid #e2e8f0; min-height: 50px; font-size: 1.1rem; color: #64748b; }
-        .quiz-area { margin-top:20px; padding-top:20px; border-top:2px dashed #e2e8f0; }
-        .opt-btn { display:block; width:100%; padding:14px; margin:8px 0; border:2px solid #e2e8f0; border-radius:12px; background:#fff; font-weight:700; cursor:pointer; text-align:left; font-family: inherit; }
-        .next-btn { background:var(--mint); color:#fff; margin-top:15px; display:none; font-family:'Fredoka One',cursive; padding:18px; border-radius:15px; border:none; width:100%; cursor:pointer; font-size: 1.2rem; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <h1>Reading Buddy Pro 📚</h1>
-    
-    <select id="lvl-select" class="level-select" onchange="changeLevel()">
-        <option value="AA">Level AA: One Word Focus</option>
-        <option value="A">Level A: 3-5 Word Patterns</option>
-        <option value="B">Level B: Predictable Sentences</option>
-        <option value="C">Level C: Pattern Breaks</option>
-        <option value="D">Level D: Natural Sentences (5-8 words)</option>
-        <option value="E">Level E: Compound (And/But)</option>
-        <option value="F">Level F: Dialogue ("She said")</option>
-        <option value="G">Level G: Smaller Text / Re-reading</option>
-    </select>
-
-    <h2 id="story-title" style="text-align:center; color:var(--sky); margin:0;"></h2>
-    <div id="story-display" class="story-text"></div>
-    
-    <button id="mic-btn" class="mic-btn" onclick="toggleMic()">Click to Start Reading 🎤</button>
-    
-    <div class="transcript-box">
-        <b>Listening Log:</b><br>
-        <span id="live-transcript">Ready for you...</span>
-    </div>
-
-    <div id="quiz-area" class="quiz-area" style="display:none;"></div>
-    <button id="next-story-btn" class="next-btn" onclick="nextStory()">Next Story ➡️</button>
-</div>
-
-<script>
-const ALL_STORIES = {
-    AA: [
-        { title: "The Farm", text: "Cow. Horse. Pig. Sheep. Farm.", q: [{q:"What is this about?", opts:["The Farm","The City"], a:0}] }
-    ],
-    A: [
-        { title: "I See", text: "I see the cat. I see the dog. I see the bird.", q: [{q:"What is repetitive?", opts:["I see the","Look at"], a:0}] }
-    ],
-    B: [
-        { title: "My Clothes", text: "I put on my shirt. I put on my pants. I put on my hat.", q: [{q:"Is the pattern predictable?", opts:["Yes","No"], a:0}] }
-    ],
-    C: [
-        { title: "A Snack", text: "I am hungry today. I want a red apple. I want a yellow banana. It is time to eat.", q: [{q:"Did the pattern break?", opts:["Yes","No"], a:0}] }
-    ],
-    D: [
-        { title: "Busy Bees", text: "Bees fly to the flowers. They get nectar to make honey. Do not bother them!", q: [{q:"How many words per sentence?", opts:["2-3","5-8"], a:1}] }
-    ],
-    E: [
-        { title: "The Turtle", text: "The turtle walks to the pond and it swims. It is slow but it is safe.", q: [{q:"Which connector was used?", opts:["And / But","Because"], a:0}] }
-    ],
-    F: [
-        { title: "The Fire", text: "'Get ready!' said the firefighter. He used a long hose to stop the hot fire.", q: [{q:"Who spoke in the story?", opts:["The firefighter","The dog"], a:0}] }
-    ],
-    G: [
-        { title: "The Garden", text: "Last week, we planted a vegetable garden behind the shed. We had to dig deep in the soil before we could drop the tiny seeds. If we don't water them every morning, they will not grow. It takes a long time to see the green sprouts.", q: [{q: "Where is the garden?", opts: ["In the front", "Behind the shed"], a: 1}, {q: "What do the seeds need?", opts: ["Water", "Sand"], a: 0}] }
-    ]
-};
-
-let currentLevel = "AA";
-let storyIdx = 0;
-let recognition;
-let isReading = false;
-let cleanTargetWords = [];
-let finalTranscript = ""; 
-
-function changeLevel() {
-    currentLevel = document.getElementById('lvl-select').value;
-    storyIdx = 0;
-    loadStory();
-}
-
-function loadStory() {
-    const story = ALL_STORIES[currentLevel][storyIdx];
-    document.getElementById('story-title').innerText = story.title;
-    document.getElementById('quiz-area').style.display = 'none';
-    document.getElementById('next-story-btn').style.display = 'none';
-    document.getElementById('live-transcript').innerHTML = "Ready...";
-    
-    finalTranscript = ""; 
-    const words = story.text.split(/\s+/);
-    cleanTargetWords = words.map(w => w.replace(/[^\w]/g, "").toLowerCase());
-    
-    document.getElementById('story-display').innerHTML = words.map((w, i) => 
-        `<span id="word-${i}" class="word">${w}</span>`
-    ).join(' ');
-}
-
-function initSpeech() {
-    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new Speech();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    
-    recognition.onresult = (event) => {
-        let interimTranscript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript + " ";
-            } else {
-                interimTranscript += event.results[i][0].transcript;
-            }
-        }
-        
-        const fullSpokenText = (finalTranscript + interimTranscript).toLowerCase();
-        document.getElementById('live-transcript').innerText = fullSpokenText; 
-        
-        const spokenWords = fullSpokenText.split(/\s+/).map(s => s.replace(/[^\w]/g, ""));
-        let currentTargetIndex = 0;
-
-        // Sequence Matching (Non-Greedy)
-        spokenWords.forEach(spoken => {
-            if (!spoken) return;
-            // Check if this spoken word matches the next expected target word
-            for (let i = currentTargetIndex; i < cleanTargetWords.length; i++) {
-                if (isMatch(spoken, cleanTargetWords[i])) {
-                    document.getElementById(`word-${i}`).className = "word correct";
-                    currentTargetIndex = i + 1; // Advance pointer so we don't highlight backward
-                    break;
-                }
-            }
-        });
-    };
-
-    recognition.onend = () => { if (isReading) recognition.start(); };
-}
-
-function toggleMic() {
-    if (!recognition) initSpeech();
-    if (isReading) {
-        isReading = false;
-        recognition.stop();
-        document.getElementById('mic-btn').innerText = "Click to Start Reading 🎤";
-        document.getElementById('mic-btn').classList.remove('listening');
-        showResults();
-    } else {
-        isReading = true;
-        finalTranscript = ""; 
-        loadStory(); 
-        recognition.start();
-        document.getElementById('mic-btn').innerText = "Listening... Click to Stop";
-        document.getElementById('mic-btn').classList.add('listening');
+const STORIES = {
+  AA: [
+    {
+      title: "The Cat",
+      text: "I see a cat. The cat is big. I like the cat.",
+      q: [
+        { q: "What does the child see?", opts: ["A dog", "A cat", "A bird", "A fish"], a: 1 },
+        { q: "What is the cat like?", opts: ["Small", "Fast", "Big", "Soft"], a: 2 },
+        { q: "How does the child feel?", opts: ["Scared", "Likes it", "Mad", "Sad"], a: 1 }
+      ]
+    },
+    {
+      title: "My Dog",
+      text: "My dog is red. My dog can run. I love my dog.",
+      q: [
+        { q: "What color is the dog?", opts: ["Blue", "Black", "Red", "Brown"], a: 2 },
+        { q: "What can the dog do?", opts: ["Swim", "Fly", "Sing", "Run"], a: 3 },
+        { q: "How does the child feel?", opts: ["Loves it", "Fears it", "Dislikes it", "Ignores it"], a: 0 }
+      ]
+    },
+    {
+      title: "The Sun",
+      text: "The sun is up. I see the sun. It is hot.",
+      q: [
+        { q: "Where is the sun?", opts: ["Down", "Behind clouds", "Up", "In the water"], a: 2 },
+        { q: "What does the child see?", opts: ["The moon", "The sun", "A star", "A cloud"], a: 1 },
+        { q: "What is the sun like?", opts: ["Cold", "Wet", "Dark", "Hot"], a: 3 }
+      ]
+    },
+    {
+      title: "The Red Apple",
+      text: "I see an apple. The apple is red. I eat the apple.",
+      q: [
+        { q: "What does the child see?", opts: ["A pear", "A banana", "An apple", "A grape"], a: 2 },
+        { q: "What color is the apple?", opts: ["Green", "Yellow", "Red", "Pink"], a: 2 },
+        { q: "What does the child do?", opts: ["Throws it", "Eats it", "Hides it", "Paints it"], a: 1 }
+      ]
+    },
+    {
+      title: "The Blue Bird",
+      text: "I see a bird. The bird is blue. The bird can fly.",
+      q: [
+        { q: "What does the child see?", opts: ["A bird", "A plane", "A bee", "A kite"], a: 0 },
+        { q: "What color is the bird?", opts: ["Red", "Blue", "Black", "Yellow"], a: 1 },
+        { q: "What can the bird do?", opts: ["Swim", "Fly", "Talk", "Run"], a: 1 }
+      ]
     }
-}
-
-function isMatch(s, t) {
-    if (!s || !t) return false;
-    if (t.length <= 3) return s === t; 
-    return s.includes(t) || t.includes(s) || (t.length > 5 && s.startsWith(t.substring(0,4)));
-}
-
-function showResults() {
-    const quizArea = document.getElementById('quiz-area');
-    const story = ALL_STORIES[currentLevel][storyIdx];
-    quizArea.innerHTML = "<h3>Quick Quiz!</h3>";
-    
-    story.q.forEach((qObj) => {
-        const div = document.createElement('div');
-        div.innerHTML = `<p><b>${qObj.q}</b></p>`;
-        qObj.opts.forEach((opt, i) => {
-            const btn = document.createElement('button');
-            btn.className = "opt-btn";
-            btn.innerText = opt;
-            btn.onclick = () => {
-                const buttons = div.querySelectorAll('.opt-btn');
-                buttons.forEach(b => b.disabled = true);
-                btn.style.background = (i === qObj.a) ? "#dcfce7" : "#fee2e2";
-            };
-            div.appendChild(btn);
-        });
-        quizArea.appendChild(div);
-    });
-    
-    quizArea.style.display = 'block';
-    document.getElementById('next-story-btn').style.display = 'block';
-}
-
-function nextStory() {
-    storyIdx = (storyIdx + 1) % ALL_STORIES[currentLevel].length;
-    loadStory();
-}
-
-loadStory();
-</script>
-</body>
-</html>
+  ],
+  A: [
+    {
+      title: "I Can Jump",
+      text: "I can jump. I can run. I can hop. I can play. It is fun.",
+      q: [
+        { q: "What is one thing the child can do?", opts: ["Swim", "Jump", "Fly", "Climb"], a: 1 },
+        { q: "What does the child say about playing?", opts: ["It is hard", "It is boring", "It is fun", "It is loud"], a: 2 },
+        { q: "Which of these can the child do?", opts: ["Swim", "Fly", "Hop", "Drive"], a: 2 }
+      ]
+    },
+    {
+      title: "The Big Box",
+      text: "I see a big box. The box is red. I put my toys in the box. I like my box.",
+      q: [
+        { q: "What color is the box?", opts: ["Blue", "Green", "Red", "Yellow"], a: 2 },
+        { q: "What does the child put in the box?", opts: ["Books", "Toys", "Food", "Clothes"], a: 1 },
+        { q: "How does the child feel about the box?", opts: ["Hates it", "Likes it", "Fears it", "Breaks it"], a: 1 }
+      ]
+    },
+    {
+      title: "The Small House",
+      text: "I see a house. The house is small. My cat lives here. My dog lives here.",
+      q: [
+        { q: "What does the child see?", opts: ["A school", "A house", "A park", "A store"], a: 1 },
+        { q: "What is the house like?", opts: ["Big", "Cold", "Old", "Small"], a: 3 },
+        { q: "Who lives in the house?", opts: ["A bird", "A fish", "A cat and dog", "A cow"], a: 2 }
+      ]
+    },
+    {
+      title: "My Green Shirt",
+      text: "I have a shirt. My shirt is green. I put it on. I look good.",
+      q: [
+        { q: "What does the child have?", opts: ["A hat", "A shirt", "A coat", "A belt"], a: 1 },
+        { q: "What color is the shirt?", opts: ["Blue", "Red", "Green", "Yellow"], a: 2 },
+        { q: "How does the child look?", opts: ["Sad", "Good", "Funny", "Bad"], a: 1 }
+      ]
+    },
+    {
+      title: "Look at the Fish",
+      text: "Look at the fish. The fish is little. The fish can swim. I like the fish.",
+      q: [
+        { q: "What should we look at?", opts: ["A frog", "A boat", "A fish", "A duck"], a: 2 },
+        { q: "What is the fish like?", opts: ["Big", "Little", "Fast", "Red"], a: 1 },
+        { q: "What can the fish do?", opts: ["Fly", "Run", "Walk", "Swim"], a: 3 }
+      ]
+    }
+  ],
+  B: [
+    {
+      title: "At the Park",
+      text: "We go to the park. I see a slide. I can go up and down. My dad is here. We have fun at the park.",
+      q: [
+        { q: "Where do they go?", opts: ["The beach", "The park", "The store", "The school"], a: 1 },
+        { q: "What does the child see at the park?", opts: ["A swing", "A slide", "A pond", "A tree"], a: 1 },
+        { q: "Who is at the park with the child?", opts: ["Their mom", "Their friend", "Their dad", "Their teacher"], a: 2 }
+      ]
+    },
+    {
+      title: "My Bed",
+      text: "My bed is soft. I get in my bed at night. I put my head on the pillow. My mom says good night. I go to sleep.",
+      q: [
+        { q: "What is the bed like?", opts: ["Hard", "Soft", "Cold", "Small"], a: 1 },
+        { q: "What does the child put their head on?", opts: ["A blanket", "A teddy", "The floor", "The pillow"], a: 3 },
+        { q: "Who says good night?", opts: ["Dad", "A friend", "Brother", "Mom"], a: 3 }
+      ]
+    },
+    {
+      title: "The Big Bus",
+      text: "I see a big bus. The bus is yellow. I get on the bus. I go to my school. My teacher is there.",
+      q: [
+        { q: "What color is the bus?", opts: ["Blue", "Yellow", "Red", "Green"], a: 1 },
+        { q: "Where does the bus go?", opts: ["The park", "The zoo", "The school", "Home"], a: 2 },
+        { q: "Who is at the school?", opts: ["Dad", "The teacher", "The cat", "Mom"], a: 1 }
+      ]
+    },
+    {
+      title: "The Little Ant",
+      text: "I see an ant. The ant is very small. It is on the leaf. It has six legs. It is a busy ant.",
+      q: [
+        { q: "What does the child see?", opts: ["A bee", "A fly", "An ant", "A worm"], a: 2 },
+        { q: "Where is the ant?", opts: ["On a rock", "On the leaf", "In the water", "In the box"], a: 1 },
+        { q: "How many legs does it have?", opts: ["Two", "Four", "Six", "Eight"], a: 2 }
+      ]
+    },
+    {
+      title: "Rainy Day Fun",
+      text: "The rain comes down. I put on my boots. I jump in a puddle. My dog jumps too. We are very wet.",
+      q: [
+        { q: "What comes down?", opts: ["Snow", "The sun", "Rain", "Leaves"], a: 2 },
+        { q: "What does the child put on?", opts: ["A hat", "Boots", "A coat", "Gloves"], a: 1 },
+        { q: "How do they feel at the end?", opts: ["Dry", "Hot", "Sad", "Wet"], a: 3 }
+      ]
+    }
+  ]
+};
